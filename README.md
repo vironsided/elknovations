@@ -2,31 +2,40 @@
 
 The parent folder (`elknovations`) contains only this project — the old static `index.html` and `assets/` copy were removed to avoid duplication.
 
-## Contact form (SMTP via serverless API)
+## Contact form email (Web3Forms)
 
-The site **POST**s to `/api/contact` (a [Vercel Serverless Function](https://vercel.com/docs/functions)). The handler uses **Nodemailer** and your **SMTP** credentials. Image attachments are supported (no third-party form service required).
+Submissions go to the inbox you use when creating a [Web3Forms](https://web3forms.com) access key (use **vusal.teymurov520@gmail.com** so leads arrive there).
 
-Set these in the **Vercel** project → **Settings** → **Environment variables** (Production). They are **server-only** — never prefixed with `VITE_`.
+The contact form sends **text fields only** on the free tier. [File attachments](https://docs.web3forms.com/getting-started/pro-features/file-attachments) are a Web3Forms **Pro** feature; visitors can paste links to photos in the message instead.
 
-| Variable | Example | Purpose |
-|----------|---------|---------|
-| `SMTP_HOST` | `smtp.gmail.com` | SMTP server |
-| `SMTP_PORT` | `587` | Usually `587` (STARTTLS) or `465` (SSL) |
-| `SMTP_SECURE` | `false` | `true` only for port 465 |
-| `SMTP_USER` | your mailbox | Login |
-| `SMTP_PASS` | app password | For Gmail: [App Password](https://support.google.com/accounts/answer/185833) |
-| `CONTACT_TO_EMAIL` | inbox that receives leads | e.g. `vusal.teymurov520@gmail.com` |
-| `SMTP_FROM` | optional | `"Elk Novations" <you@gmail.com>` — defaults to `SMTP_USER` |
-| `SMTP_CLIENT_NAME` | optional | EHLO hostname (FQDN). Default: `elknovations.vercel.app`. Set if mail is accepted but never arrives. |
-| `CONTACT_BCC_EMAIL` | optional | Extra inbox(es), comma-separated — copy of every lead (useful if `SMTP_USER` and `CONTACT_TO_EMAIL` are the same Gmail). |
+1. Open [web3forms.com](https://web3forms.com), enter that email, and copy your **Access Key**.
+2. In the `web` folder, create a file named `.env` (see `.env.example`):
 
-**Same Gmail for SMTP and inbox:** If `SMTP_USER` and `CONTACT_TO_EMAIL` are the same address, Gmail often does **not** show the message in **Inbox** — look in **Sent**, or use another address for `CONTACT_TO_EMAIL`, or set `CONTACT_BCC_EMAIL` to a second mailbox.
+   ```env
+   VITE_WEB3FORMS_ACCESS_KEY=paste_your_key_here
+   ```
 
-Redeploy after saving. **Local:** plain `npm run dev` does not run Vercel functions — run `vercel dev` from the `web` folder, or test on the deployed URL.
+3. Restart the dev server (`npm run dev`) or rebuild (`npm run build`).
 
-**If the form returns HTTP 503** (“SMTP is not configured”): the function is running, but one or more variables are missing in Vercel. Open **Settings → Environment variables**, confirm **all four** are present (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_TO_EMAIL`) with **no typos**, scoped to **Production**, then **Redeploy** (Deployments → … → Redeploy). New projects often forget `CONTACT_TO_EMAIL` or paste the Gmail password instead of an [App Password](https://support.google.com/accounts/answer/185833).
+**Security:** `.env` is listed in `.gitignore` — your access key must **never** be committed. If you rotate the key on Web3Forms, update only your local `.env` and the environment variables on your host (Netlify, Vercel, etc.); GitHub stays free of secrets.
 
-**Static hosting only (e.g. Netlify without functions):** you must add an equivalent serverless function or host the API elsewhere; this repo targets Vercel for the contact API.
+### Vercel
+
+The live build does **not** use your laptop’s `.env`. Add **`VITE_WEB3FORMS_ACCESS_KEY`** in the Vercel project → **Settings** → **Environment variables** (same value as [web3forms.com](https://web3forms.com)), for **Production** (or **All Environments**), **Save**, then **Deployments** → **Redeploy**.
+
+### Netlify (`elknovations.netlify.app`)
+
+The live site does **not** use your laptop’s `.env`. You must add the same variable in Netlify so Vite can embed it when building:
+
+1. [Netlify](https://app.netlify.com) → your site → **Site configuration** → **Environment variables**.
+2. **Add a variable**: name `VITE_WEB3FORMS_ACCESS_KEY`, value = your key from [web3forms.com](https://web3forms.com) (same as in local `.env`).
+3. **Save**, then **Deploys** → **Trigger deploy** → **Clear cache and deploy site** (or push a commit so Netlify rebuilds).
+
+Until this is set, the contact form on production will show a configuration message instead of sending.
+
+If the variable is missing during `npm run build`, the build **fails** with an explicit error (so Netlify logs show the problem instead of publishing a broken form).
+
+**Troubleshooting:** If you still see “needs your Web3Forms key” after adding the variable, check: (1) name is exactly `VITE_WEB3FORMS_ACCESS_KEY` (including `VITE_`), (2) it is under **this site’s** Environment variables, not only account-wide, (3) you ran a **new deploy** after saving (Deploys → Trigger deploy → Clear cache and deploy), (4) the variable’s **scope** includes **Production** — in Netlify you can limit a variable to “Deploy Previews” or specific branches only; if Production is unchecked, production builds still get an empty value.
 
 ---
 

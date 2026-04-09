@@ -1,8 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** Optional: override contact API URL (default `/api/contact`). */
-  readonly VITE_CONTACT_API_URL?: string;
+  readonly VITE_WEB3FORMS_ACCESS_KEY: string;
 }
 
 interface ImportMeta {

@@ -1,116 +1,56 @@
-import { useState, useRef, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { brand, contact, footerLinks } from "../data/site";
 
-const MAX_PHOTOS = 5;
-const MAX_BYTES = 5 * 1024 * 1024;
+const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 
-function contactApiUrl(): string {
-  const override = import.meta.env.VITE_CONTACT_API_URL?.trim();
-  if (override) return override;
-  return "/api/contact";
+function getAccessKey(): string {
+  return String(import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "").trim();
+}
+
+function missingKeyHelp(): string {
+  if (import.meta.env.PROD) {
+    return "The live site needs VITE_WEB3FORMS_ACCESS_KEY in your host (Vercel / Netlify) → Environment variables → save → redeploy. Vite reads it at build time.";
+  }
+  return "Add VITE_WEB3FORMS_ACCESS_KEY to a `.env` file in the `web` folder (free key from web3forms.com — use the inbox that should receive leads).";
 }
 
 export function Contact() {
   const [sent, setSent] = useState(false);
-  /** Gmail: if SMTP_USER === CONTACT_TO_EMAIL, messages often appear only under Sent, not Inbox. */
-  const [sameMailboxHint, setSameMailboxHint] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [photos, setPhotos] = useState<File[]>([]);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  function handlePhotosChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setPhotoError(null);
-    const picked = e.target.files ? Array.from(e.target.files) : [];
-    if (picked.length === 0) {
-      setPhotos([]);
-      return;
-    }
-    const tooBig = picked.find((f) => f.size > MAX_BYTES);
-    if (tooBig) {
-      setPhotoError(
-        `Each file must be ${MAX_BYTES / (1024 * 1024)} MB or smaller (“${tooBig.name}” is too large).`,
-      );
-      e.target.value = "";
-      return;
-    }
-    if (picked.length > MAX_PHOTOS) {
-      setPhotoError(`Please choose at most ${MAX_PHOTOS} images.`);
-      e.target.value = "";
-      return;
-    }
-    const nonImages = picked.filter((f) => !f.type.startsWith("image/"));
-    if (nonImages.length) {
-      setPhotoError("Only image files (JPG, PNG, WebP, HEIC) are allowed.");
-      e.target.value = "";
-      return;
-    }
-    setPhotos(picked);
-  }
-
-  function clearPhotos() {
-    setPhotos([]);
-    setPhotoError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
-    if (photoError) return;
+
+    const key = getAccessKey();
+    if (!key) {
+      setSubmitError(missingKeyHelp());
+      return;
+    }
 
     setSubmitting(true);
     const form = e.currentTarget;
     const fd = new FormData(form);
-    for (const file of photos) {
-      fd.append("attachment", file);
-    }
+    fd.append("access_key", key);
+    fd.append("subject", "Elk Novations — Website contact form");
 
     try {
-      const res = await fetch(contactApiUrl(), {
+      const res = await fetch(WEB3FORMS_URL, {
         method: "POST",
         body: fd,
       });
-      const data = (await res.json().catch(() => ({}))) as {
-        ok?: boolean;
-        error?: string;
-        missing?: string[];
-        sameMailbox?: boolean;
-        vercelEnv?: string;
-      };
+      const data = (await res.json().catch(() => ({}))) as { success?: boolean; message?: string };
 
-      if (res.ok && data.ok) {
-        setSameMailboxHint(Boolean(data.sameMailbox));
+      if (res.ok && data.success) {
         setSent(true);
         form.reset();
-        clearPhotos();
       } else {
-        let msg =
-          data.error ||
-          (res.status === 503
-            ? "Email is not configured on the server yet."
-            : "Something went wrong. Please try again or email us directly.");
-        if (data.missing?.length) {
-          msg += ` Missing: ${data.missing.join(", ")}.`;
-        }
-        if (res.status === 503 && data.vercelEnv === "preview") {
-          msg +=
-            " You are on a Preview deployment — in Vercel, edit each variable and enable Preview (or “All Environments”), then redeploy. Production-only variables are invisible here.";
-        }
-        if (res.status === 503 && data.vercelEnv === "production") {
-          msg +=
-            " If you already added these in Vercel: confirm they are enabled for Production (not only Preview), save, then Deployments → … → Redeploy.";
-        }
-        setSubmitError(msg);
+        setSubmitError(data.message || "Something went wrong. Please try again or email us directly.");
       }
     } catch {
-      setSubmitError(
-        import.meta.env.DEV
-          ? "Could not reach /api/contact. Run `vercel dev` from the web folder, or test on the deployed site."
-          : "Network error. Check your connection and try again.",
-      );
+      setSubmitError("Network error. Check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -181,25 +121,14 @@ export function Contact() {
             className="rounded-3xl bg-white p-6 text-neutral-900 shadow-2xl md:p-10"
           >
             {sent ? (
-              <div className="space-y-4 py-10 text-center">
-                <p className="text-lg text-neutral-600">
-                  Thank you — we received your message and will reply shortly.
-                </p>
-                {sameMailboxHint ? (
-                  <p className="mx-auto max-w-md rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm leading-relaxed text-amber-950">
-                    <strong className="font-semibold">Gmail:</strong> you are sending and receiving on the same address.
-                    New mail often shows only under{" "}
-                    <span className="whitespace-nowrap font-medium">Sent</span>, not Inbox. Check Sent, or set{" "}
-                    <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">CONTACT_TO_EMAIL</code> to a
-                    different inbox (or add <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">CONTACT_BCC_EMAIL</code> in Vercel).
-                  </p>
-                ) : null}
-              </div>
+              <p className="py-12 text-center text-lg text-neutral-600">
+                Thank you — we received your message and will reply shortly.
+              </p>
             ) : (
               <form className="relative flex flex-col gap-5" onSubmit={handleSubmit}>
                 <input
-                  type="text"
-                  name="_hp"
+                  type="checkbox"
+                  name="botcheck"
                   tabIndex={-1}
                   autoComplete="off"
                   className="pointer-events-none absolute left-0 top-0 h-0 w-0 opacity-0"
@@ -258,67 +187,8 @@ export function Contact() {
                     placeholder="Tell us about your project…"
                   />
                   <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                    Optional: attach photos of the space (JPG, PNG, WebP, HEIC)—sent by email from our server via SMTP.
+                    The free Web3Forms tier sends text only — paste links to photos if needed.
                   </p>
-                </div>
-                <div>
-                  <span className="mb-2 block text-sm font-medium" id="photos-label">
-                    Attach photos
-                  </span>
-                  <div
-                    className="flex flex-wrap items-center gap-3 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-4"
-                    role="group"
-                    aria-labelledby="photos-label"
-                  >
-                    <input
-                      ref={fileInputRef}
-                      id="photos"
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                      multiple
-                      className="sr-only"
-                      onChange={handlePhotosChange}
-                      aria-describedby="photos-hint"
-                    />
-                    <label
-                      htmlFor="photos"
-                      className="cursor-pointer rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
-                    >
-                      Choose files
-                    </label>
-                    <span className="text-sm text-neutral-600" aria-live="polite">
-                      {photos.length === 0
-                        ? "No file selected"
-                        : `${photos.length} file${photos.length === 1 ? "" : "s"} selected`}
-                    </span>
-                  </div>
-                  <p id="photos-hint" className="mt-1.5 text-xs text-neutral-500">
-                    Up to {MAX_PHOTOS} images · max {MAX_BYTES / (1024 * 1024)} MB each
-                  </p>
-                  {photoError && (
-                    <p className="mt-2 text-sm text-red-600" role="alert">
-                      {photoError}
-                    </p>
-                  )}
-                  {photos.length > 0 && !photoError && (
-                    <ul className="mt-3 space-y-1.5 rounded-lg bg-neutral-100 px-3 py-2 text-xs text-neutral-700">
-                      {photos.map((f) => (
-                        <li key={f.name + f.size} className="flex justify-between gap-2">
-                          <span className="truncate">{f.name}</span>
-                          <span className="shrink-0 text-neutral-500">{(f.size / 1024).toFixed(0)} KB</span>
-                        </li>
-                      ))}
-                      <li>
-                        <button
-                          type="button"
-                          onClick={clearPhotos}
-                          className="mt-1 text-xs font-medium text-neutral-600 underline underline-offset-2 hover:text-black"
-                        >
-                          Clear all
-                        </button>
-                      </li>
-                    </ul>
-                  )}
                 </div>
                 {submitError && (
                   <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
@@ -333,15 +203,16 @@ export function Contact() {
                   {submitting ? "Sending…" : "Send message"}
                 </button>
                 <p className="text-center text-xs text-neutral-500">
-                  Submissions go to {contact.email} via our secure mail server (SMTP).
-                  {import.meta.env.DEV ? (
-                    <>
-                      {" "}
-                      Plain <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">npm run dev</code> has no
-                      API — use <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">vercel dev</code> or
-                      the live site to test.
-                    </>
-                  ) : null}
+                  Submissions go to {contact.email} via{" "}
+                  <a
+                    href="https://web3forms.com"
+                    className="underline underline-offset-2 hover:text-neutral-800"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Web3Forms
+                  </a>
+                  .
                 </p>
               </form>
             )}
