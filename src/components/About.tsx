@@ -54,24 +54,28 @@ export function About() {
         </div>
 
         <motion.div
-          className="mt-16 flex gap-3 overflow-x-auto pb-2 md:gap-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mt-16 -mx-5 overflow-hidden md:-mx-10 lg:-mx-14"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          {galleryImages.map((src, i) => (
-            <motion.div
-              key={src}
-              initial={{ opacity: 0, scale: 0.96 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.06, duration: 0.45 }}
-              className="relative h-64 w-44 shrink-0 overflow-hidden md:h-80 md:w-52 lg:h-[22rem] lg:w-60"
-            >
-              <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
-            </motion.div>
-          ))}
+          <div className="about-gallery-marquee gap-3 md:gap-4">
+            {[...galleryImages, ...galleryImages].map((src, i) => (
+              <div
+                key={`${src}-${i}`}
+                className="relative h-64 w-44 shrink-0 overflow-hidden md:h-80 md:w-52 lg:h-[22rem] lg:w-60"
+              >
+                <img
+                  src={src}
+                  alt=""
+                  className="h-full w-full object-cover select-none"
+                  loading="lazy"
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

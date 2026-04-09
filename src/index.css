@@ -23,3 +23,33 @@ body {
 #root {
   min-height: 100svh;
 }
+
+/* About section: seamless infinite horizontal scroll */
+@keyframes about-gallery-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.about-gallery-marquee {
+  display: flex;
+  width: max-content;
+  animation: about-gallery-marquee 55s linear infinite;
+}
+
+.about-gallery-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-gallery-marquee {
+    animation: none;
+  }
+
+  .about-gallery-marquee:hover {
+    animation-play-state: running;
+  }
+}
