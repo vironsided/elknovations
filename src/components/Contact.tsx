@@ -78,6 +78,7 @@ export function Contact() {
         error?: string;
         missing?: string[];
         sameMailbox?: boolean;
+        vercelEnv?: string;
       };
 
       if (res.ok && data.ok) {
@@ -93,6 +94,14 @@ export function Contact() {
             : "Something went wrong. Please try again or email us directly.");
         if (data.missing?.length) {
           msg += ` Missing: ${data.missing.join(", ")}.`;
+        }
+        if (res.status === 503 && data.vercelEnv === "preview") {
+          msg +=
+            " You are on a Preview deployment — in Vercel, edit each variable and enable Preview (or “All Environments”), then redeploy. Production-only variables are invisible here.";
+        }
+        if (res.status === 503 && data.vercelEnv === "production") {
+          msg +=
+            " If you already added these in Vercel: confirm they are enabled for Production (not only Preview), save, then Deployments → … → Redeploy.";
         }
         setSubmitError(msg);
       }

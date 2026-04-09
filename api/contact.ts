@@ -51,12 +51,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!to) missing.push("CONTACT_TO_EMAIL");
 
   if (missing.length > 0) {
-    console.error("contact: missing env:", missing.join(", "));
+    const vercelEnv = process.env.VERCEL_ENV;
+    console.error("contact: missing env:", missing.join(", "), "VERCEL_ENV=", vercelEnv);
     res.status(503).json({
       ok: false,
       error:
-        "SMTP is not configured. In Vercel: Project → Settings → Environment Variables — add the missing names below for Production, then redeploy.",
+        "SMTP is not configured. In Vercel: Project → Settings → Environment Variables — add the variables below. Enable them for the environment you use (Production vs Preview), then Redeploy.",
       missing,
+      /** Helps debug: `preview` deployments do not see Production-only variables. */
+      vercelEnv: vercelEnv ?? undefined,
     });
     return;
   }
