@@ -1,56 +1,96 @@
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { brand, contact, footerLinks } from "../data/site";
 
-const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+const MAX_PHOTOS = 5;
+const MAX_BYTES = 5 * 1024 * 1024;
 
-function getAccessKey(): string {
-  return String(import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "").trim();
-}
-
-function missingKeyHelp(): string {
-  if (import.meta.env.PROD) {
-    return "The live site needs your Web3Forms key in Netlify: Site configuration → Environment variables → Add variable VITE_WEB3FORMS_ACCESS_KEY (paste your key from web3forms.com) → Save → Deploys → Trigger deploy (or “Clear cache and deploy site”). Vite reads this at build time.";
-  }
-  return "Email delivery is not configured yet. Add VITE_WEB3FORMS_ACCESS_KEY to a `.env` file in the `web` folder (free key from web3forms.com — use vusal.teymurov520@gmail.com when registering).";
+function contactApiUrl(): string {
+  const override = import.meta.env.VITE_CONTACT_API_URL?.trim();
+  if (override) return override;
+  return "/api/contact";
 }
 
 export function Contact() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handlePhotosChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPhotoError(null);
+    const picked = e.target.files ? Array.from(e.target.files) : [];
+    if (picked.length === 0) {
+      setPhotos([]);
+      return;
+    }
+    const tooBig = picked.find((f) => f.size > MAX_BYTES);
+    if (tooBig) {
+      setPhotoError(
+        `Each file must be ${MAX_BYTES / (1024 * 1024)} MB or smaller (“${tooBig.name}” is too large).`,
+      );
+      e.target.value = "";
+      return;
+    }
+    if (picked.length > MAX_PHOTOS) {
+      setPhotoError(`Please choose at most ${MAX_PHOTOS} images.`);
+      e.target.value = "";
+      return;
+    }
+    const nonImages = picked.filter((f) => !f.type.startsWith("image/"));
+    if (nonImages.length) {
+      setPhotoError("Only image files (JPG, PNG, WebP, HEIC) are allowed.");
+      e.target.value = "";
+      return;
+    }
+    setPhotos(picked);
+  }
+
+  function clearPhotos() {
+    setPhotos([]);
+    setPhotoError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
-
-    const key = getAccessKey();
-    if (!key) {
-      setSubmitError(missingKeyHelp());
-      return;
-    }
+    if (photoError) return;
 
     setSubmitting(true);
     const form = e.currentTarget;
     const fd = new FormData(form);
-    fd.append("access_key", key);
-    fd.append("subject", "Elk Novations — Website contact form");
+    for (const file of photos) {
+      fd.append("attachment", file);
+    }
 
     try {
-      const res = await fetch(WEB3FORMS_URL, {
+      const res = await fetch(contactApiUrl(), {
         method: "POST",
         body: fd,
       });
-      const data = (await res.json().catch(() => ({}))) as { success?: boolean; message?: string };
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
 
-      if (res.ok && data.success) {
+      if (res.ok && data.ok) {
         setSent(true);
         form.reset();
+        clearPhotos();
       } else {
-        setSubmitError(data.message || "Something went wrong. Please try again or email us directly.");
+        setSubmitError(
+          data.error ||
+            (res.status === 503
+              ? "Email is not configured on the server yet."
+              : "Something went wrong. Please try again or email us directly."),
+        );
       }
     } catch {
-      setSubmitError("Network error. Check your connection and try again.");
+      setSubmitError(
+        import.meta.env.DEV
+          ? "Could not reach /api/contact. Run `vercel dev` from the web folder, or test on the deployed site."
+          : "Network error. Check your connection and try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -125,7 +165,15 @@ export function Contact() {
                 Thank you — we received your message and will reply shortly.
               </p>
             ) : (
-              <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+              <form className="relative flex flex-col gap-5" onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  name="_hp"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="pointer-events-none absolute left-0 top-0 h-0 w-0 opacity-0"
+                  aria-hidden
+                />
                 <div>
                   <label className="mb-2 block text-sm font-medium" htmlFor="fn">
                     Name <span className="text-red-500">*</span>
@@ -179,9 +227,67 @@ export function Contact() {
                     placeholder="Tell us about your project…"
                   />
                   <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                    Optional: add links to photos of the space (e.g. Google Drive or Dropbox)—file uploads require a
-                    Web3Forms Pro plan, so we use text-only submissions on the free tier.
+                    Optional: attach photos of the space (JPG, PNG, WebP, HEIC)—sent by email from our server via SMTP.
                   </p>
+                </div>
+                <div>
+                  <span className="mb-2 block text-sm font-medium" id="photos-label">
+                    Attach photos
+                  </span>
+                  <div
+                    className="flex flex-wrap items-center gap-3 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-4"
+                    role="group"
+                    aria-labelledby="photos-label"
+                  >
+                    <input
+                      ref={fileInputRef}
+                      id="photos"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+                      multiple
+                      className="sr-only"
+                      onChange={handlePhotosChange}
+                      aria-describedby="photos-hint"
+                    />
+                    <label
+                      htmlFor="photos"
+                      className="cursor-pointer rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                    >
+                      Choose files
+                    </label>
+                    <span className="text-sm text-neutral-600" aria-live="polite">
+                      {photos.length === 0
+                        ? "No file selected"
+                        : `${photos.length} file${photos.length === 1 ? "" : "s"} selected`}
+                    </span>
+                  </div>
+                  <p id="photos-hint" className="mt-1.5 text-xs text-neutral-500">
+                    Up to {MAX_PHOTOS} images · max {MAX_BYTES / (1024 * 1024)} MB each
+                  </p>
+                  {photoError && (
+                    <p className="mt-2 text-sm text-red-600" role="alert">
+                      {photoError}
+                    </p>
+                  )}
+                  {photos.length > 0 && !photoError && (
+                    <ul className="mt-3 space-y-1.5 rounded-lg bg-neutral-100 px-3 py-2 text-xs text-neutral-700">
+                      {photos.map((f) => (
+                        <li key={f.name + f.size} className="flex justify-between gap-2">
+                          <span className="truncate">{f.name}</span>
+                          <span className="shrink-0 text-neutral-500">{(f.size / 1024).toFixed(0)} KB</span>
+                        </li>
+                      ))}
+                      <li>
+                        <button
+                          type="button"
+                          onClick={clearPhotos}
+                          className="mt-1 text-xs font-medium text-neutral-600 underline underline-offset-2 hover:text-black"
+                        >
+                          Clear all
+                        </button>
+                      </li>
+                    </ul>
+                  )}
                 </div>
                 {submitError && (
                   <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
@@ -196,12 +302,13 @@ export function Contact() {
                   {submitting ? "Sending…" : "Send message"}
                 </button>
                 <p className="text-center text-xs text-neutral-500">
-                  Submissions go to {contact.email} via Web3Forms.
+                  Submissions go to {contact.email} via our secure mail server (SMTP).
                   {import.meta.env.DEV ? (
                     <>
                       {" "}
-                      Locally, add your key in{" "}
-                      <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">web/.env</code>.
+                      Plain <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">npm run dev</code> has no
+                      API — use <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">vercel dev</code> or
+                      the live site to test.
                     </>
                   ) : null}
                 </p>
