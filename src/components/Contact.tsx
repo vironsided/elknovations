@@ -1,9 +1,7 @@
-import { useState, useRef, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { brand, contact, footerLinks } from "../data/site";
 
-const MAX_PHOTOS = 5;
-const MAX_BYTES = 5 * 1024 * 1024;
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 
 function getAccessKey(): string {
@@ -21,49 +19,10 @@ export function Contact() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [photos, setPhotos] = useState<File[]>([]);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  function handlePhotosChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setPhotoError(null);
-    const picked = e.target.files ? Array.from(e.target.files) : [];
-    if (picked.length === 0) {
-      setPhotos([]);
-      return;
-    }
-    const tooBig = picked.find((f) => f.size > MAX_BYTES);
-    if (tooBig) {
-      setPhotoError(
-        `Each image must be ${MAX_BYTES / (1024 * 1024)} MB or smaller (“${tooBig.name}” is too large).`,
-      );
-      e.target.value = "";
-      return;
-    }
-    if (picked.length > MAX_PHOTOS) {
-      setPhotoError(`Please choose at most ${MAX_PHOTOS} images.`);
-      e.target.value = "";
-      return;
-    }
-    const nonImages = picked.filter((f) => !f.type.startsWith("image/"));
-    if (nonImages.length) {
-      setPhotoError("Only image files (JPG, PNG, WebP, HEIC) are allowed.");
-      e.target.value = "";
-      return;
-    }
-    setPhotos(picked);
-  }
-
-  function clearPhotos() {
-    setPhotos([]);
-    setPhotoError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
-    if (photoError) return;
 
     const key = getAccessKey();
     if (!key) {
@@ -77,10 +36,6 @@ export function Contact() {
     fd.append("access_key", key);
     fd.append("subject", "Elk Novations — Website contact form");
 
-    for (const file of photos) {
-      fd.append("attachment", file);
-    }
-
     try {
       const res = await fetch(WEB3FORMS_URL, {
         method: "POST",
@@ -91,7 +46,6 @@ export function Contact() {
       if (res.ok && data.success) {
         setSent(true);
         form.reset();
-        clearPhotos();
       } else {
         setSubmitError(data.message || "Something went wrong. Please try again or email us directly.");
       }
@@ -225,70 +179,9 @@ export function Contact() {
                     placeholder="Tell us about your project…"
                   />
                   <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                    Optional: attach photos of the space you want to restore or build—helps us understand scope
-                    faster.
+                    Optional: add links to photos of the space (e.g. Google Drive or Dropbox)—file uploads require a
+                    Web3Forms Pro plan, so we use text-only submissions on the free tier.
                   </p>
-                </div>
-                <div>
-                  <span className="mb-2 block text-sm font-medium" id="photos-label">
-                    Attach photos
-                  </span>
-                  <div
-                    className="flex flex-wrap items-center gap-3 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-4"
-                    role="group"
-                    aria-labelledby="photos-label"
-                  >
-                    <input
-                      ref={fileInputRef}
-                      id="photos"
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                      multiple
-                      className="sr-only"
-                      onChange={handlePhotosChange}
-                      aria-describedby="photos-hint"
-                    />
-                    <label
-                      htmlFor="photos"
-                      className="cursor-pointer rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
-                    >
-                      Choose files
-                    </label>
-                    <span className="text-sm text-neutral-600" aria-live="polite">
-                      {photos.length === 0
-                        ? "No file selected"
-                        : `${photos.length} file${photos.length === 1 ? "" : "s"} selected`}
-                    </span>
-                  </div>
-                  <p id="photos-hint" className="mt-1.5 text-xs text-neutral-500">
-                    Up to {MAX_PHOTOS} images · max {MAX_BYTES / (1024 * 1024)} MB each · JPG, PNG, WebP, HEIC
-                  </p>
-                  {photoError && (
-                    <p className="mt-2 text-sm text-red-600" role="alert">
-                      {photoError}
-                    </p>
-                  )}
-                  {photos.length > 0 && !photoError && (
-                    <ul className="mt-3 space-y-1.5 rounded-lg bg-neutral-100 px-3 py-2 text-xs text-neutral-700">
-                      {photos.map((f) => (
-                        <li key={f.name + f.size} className="flex justify-between gap-2">
-                          <span className="truncate">{f.name}</span>
-                          <span className="shrink-0 text-neutral-500">
-                            {(f.size / 1024).toFixed(0)} KB
-                          </span>
-                        </li>
-                      ))}
-                      <li>
-                        <button
-                          type="button"
-                          onClick={clearPhotos}
-                          className="mt-1 text-xs font-medium text-neutral-600 underline underline-offset-2 hover:text-black"
-                        >
-                          Clear all
-                        </button>
-                      </li>
-                    </ul>
-                  )}
                 </div>
                 {submitError && (
                   <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
@@ -304,19 +197,13 @@ export function Contact() {
                 </button>
                 <p className="text-center text-xs text-neutral-500">
                   Submissions go to {contact.email} via Web3Forms.
-                  {import.meta.env.PROD ? (
-                    <>
-                      {" "}
-                      On Netlify, set <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">VITE_WEB3FORMS_ACCESS_KEY</code> under
-                      Environment variables and redeploy.
-                    </>
-                  ) : (
+                  {import.meta.env.DEV ? (
                     <>
                       {" "}
                       Locally, add your key in{" "}
                       <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">web/.env</code>.
                     </>
-                  )}
+                  ) : null}
                 </p>
               </form>
             )}

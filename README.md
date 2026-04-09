@@ -6,6 +6,8 @@ The parent folder (`elknovations`) contains only this project — the old static
 
 Submissions go to the inbox you use when creating a [Web3Forms](https://web3forms.com) access key (use **vusal.teymurov520@gmail.com** so leads arrive there).
 
+The contact form sends **text fields only** on the free tier. [File attachments](https://docs.web3forms.com/getting-started/pro-features/file-attachments) are a Web3Forms **Pro** feature; visitors can paste links to photos in the message instead.
+
 1. Open [web3forms.com](https://web3forms.com), enter that email, and copy your **Access Key**.
 2. In the `web` folder, create a file named `.env` (see `.env.example`):
 
