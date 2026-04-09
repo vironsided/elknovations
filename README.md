@@ -27,6 +27,8 @@ The live site does **not** use your laptop’s `.env`. You must add the same var
 
 Until this is set, the contact form on production will show a configuration message instead of sending.
 
+If the variable is missing during `npm run build`, the build **fails** with an explicit error (so Netlify logs show the problem instead of publishing a broken form).
+
 **Troubleshooting:** If you still see “needs your Web3Forms key” after adding the variable, check: (1) name is exactly `VITE_WEB3FORMS_ACCESS_KEY` (including `VITE_`), (2) it is under **this site’s** Environment variables, not only account-wide, (3) you ran a **new deploy** after saving (Deploys → Trigger deploy → Clear cache and deploy), (4) the variable’s **scope** includes **Production** — in Netlify you can limit a variable to “Deploy Previews” or specific branches only; if Production is unchecked, production builds still get an empty value.
 
 ---
