@@ -2,6 +2,14 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { brand, nav } from "../data/site";
 
+function scrollToSection(href: string) {
+  const id = href.replace(/^#/, "");
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.history.replaceState(null, "", href);
+}
+
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -59,7 +67,11 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className="rounded-lg px-3 py-3 text-base font-medium text-white/95 hover:bg-white/5"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMenuOpen(false);
+                    window.setTimeout(() => scrollToSection(item.href), 120);
+                  }}
                 >
                   {item.label}
                 </a>
