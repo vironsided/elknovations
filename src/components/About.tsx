@@ -19,8 +19,8 @@ const item = {
 
 export function About() {
   return (
-    <section id="about" className="scroll-mt-24 bg-white px-5 py-20 md:px-10 lg:px-14 lg:py-28">
-      <div className="mx-auto max-w-[1400px]">
+    <section id="about" className="scroll-mt-24 bg-white py-20 md:py-24 lg:py-28">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-10 lg:px-14">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <motion.div
             className="lg:col-span-5"
@@ -52,32 +52,32 @@ export function About() {
             {about.body}
           </motion.p>
         </div>
-
-        <motion.div
-          className="mt-16 -mx-5 overflow-hidden md:-mx-10 lg:-mx-14"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="about-gallery-marquee gap-3 md:gap-4">
-            {[...galleryImages, ...galleryImages].map((src, i) => (
-              <div
-                key={`${src}-${i}`}
-                className="relative h-64 w-44 shrink-0 overflow-hidden md:h-80 md:w-52 lg:h-[22rem] lg:w-60"
-              >
-                <img
-                  src={src}
-                  alt=""
-                  className="h-full w-full object-cover select-none"
-                  loading="lazy"
-                  draggable={false}
-                />
-              </div>
-            ))}
-          </div>
-        </motion.div>
       </div>
+
+      <motion.div
+        className="mt-16 w-full overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="about-gallery-marquee gap-3 md:gap-4">
+          {[...galleryImages, ...galleryImages].map((src, i) => (
+            <div
+              key={`${src}-${i}`}
+              className="relative h-64 w-44 shrink-0 overflow-hidden md:h-80 md:w-52 lg:h-[22rem] lg:w-60"
+            >
+              <img
+                src={src}
+                alt=""
+                className="h-full w-full object-cover select-none"
+                loading="lazy"
+                draggable={false}
+              />
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </section>
   );
 }

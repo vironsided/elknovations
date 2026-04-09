@@ -18,6 +18,7 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 #root {
@@ -50,6 +51,44 @@ body {
   }
 
   .about-gallery-marquee:hover {
+    animation-play-state: running;
+  }
+}
+
+/* Testimonials: two seamless rows (second runs in reverse) */
+@keyframes testimonials-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.testimonials-marquee-row {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  animation: testimonials-marquee 140s linear infinite;
+}
+
+.testimonials-marquee-row--reverse {
+  animation: testimonials-marquee 155s linear infinite reverse;
+}
+
+.testimonials-marquee-row:hover,
+.testimonials-marquee-row--reverse:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .testimonials-marquee-row,
+  .testimonials-marquee-row--reverse {
+    animation: none;
+  }
+
+  .testimonials-marquee-row:hover,
+  .testimonials-marquee-row--reverse:hover {
     animation-play-state: running;
   }
 }

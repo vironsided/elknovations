@@ -1,13 +1,27 @@
 import { motion } from "framer-motion";
 import { testimonials } from "../data/site";
 
+function StarRow() {
+  return (
+    <div className="mb-3 flex gap-0.5 text-black" aria-hidden>
+      {"★★★★★".split("").map((s, j) => (
+        <span key={j}>{s}</span>
+      ))}
+    </div>
+  );
+}
+
 export function Testimonials() {
+  const rowForward = [...testimonials, ...testimonials];
+  const reversed = [...testimonials].reverse();
+  const rowReverse = [...reversed, ...reversed];
+
   return (
     <section
       id="testimonials"
-      className="scroll-mt-24 border-t border-neutral-200 bg-white px-5 py-20 md:px-10 lg:px-14 lg:py-28"
+      className="scroll-mt-24 overflow-x-hidden border-t border-neutral-200 bg-white py-20 md:py-24 lg:py-28"
     >
-      <div className="mx-auto max-w-[1400px]">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-10 lg:px-14">
         <motion.div
           className="mx-auto max-w-2xl text-center"
           initial={{ opacity: 0, y: 16 }}
@@ -25,29 +39,40 @@ export function Testimonials() {
             Honest feedback from homeowners who chose Elk Novations.
           </p>
         </motion.div>
+      </div>
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <motion.article
-              key={t.name + i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ delay: (i % 3) * 0.05, duration: 0.45 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className={`rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md ${
-                i % 2 === 0 ? "border-neutral-200 bg-white" : "border-transparent bg-neutral-100"
-              }`}
-            >
-              <div className="mb-3 flex gap-0.5 text-black" aria-hidden>
-                {"★★★★★".split("").map((s, j) => (
-                  <span key={j}>{s}</span>
-                ))}
-              </div>
-              <p className="text-sm leading-relaxed text-neutral-700">{t.text}</p>
-              <p className="mt-4 text-sm font-semibold text-black">{t.name}</p>
-            </motion.article>
-          ))}
+      <div className="mt-14 flex w-full flex-col gap-5">
+        <div className="w-full overflow-hidden">
+          <div className="testimonials-marquee-row py-1">
+            {rowForward.map((t, i) => (
+              <article
+                key={`t-a-${i}`}
+                className={`w-80 shrink-0 rounded-2xl border p-6 shadow-sm ${
+                  i % 2 === 0 ? "border-neutral-200 bg-white" : "border-transparent bg-neutral-100"
+                }`}
+              >
+                <StarRow />
+                <p className="text-sm leading-relaxed text-neutral-700">{t.text}</p>
+                <p className="mt-4 text-sm font-semibold text-black">{t.name}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+        <div className="w-full overflow-hidden">
+          <div className="testimonials-marquee-row testimonials-marquee-row--reverse py-1">
+            {rowReverse.map((t, i) => (
+              <article
+                key={`t-b-${i}`}
+                className={`w-80 shrink-0 rounded-2xl border p-6 shadow-sm ${
+                  i % 2 === 0 ? "border-neutral-200 bg-neutral-100" : "border-transparent bg-white"
+                }`}
+              >
+                <StarRow />
+                <p className="text-sm leading-relaxed text-neutral-700">{t.text}</p>
+                <p className="mt-4 text-sm font-semibold text-black">{t.name}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
