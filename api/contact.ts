@@ -31,7 +31,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const host = process.env.SMTP_HOST?.trim();
   const port = Number(process.env.SMTP_PORT ?? "587");
   const user = process.env.SMTP_USER?.trim();
-  const pass = process.env.SMTP_PASS?.trim();
+  /** Gmail app passwords are 16 chars; spaces are ignored — strip so copy/paste from Google always works. */
+  const pass = (process.env.SMTP_PASS ?? "").trim().replace(/\s+/g, "");
   const to = process.env.CONTACT_TO_EMAIL?.trim();
 
   const missing: string[] = [];
@@ -127,6 +128,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       port,
       secure,
       auth: { user, pass },
+      requireTLS: !secure && port === 587,
+      tls: { minVersion: "TLSv1.2" },
+      connectionTimeout: 25_000,
     });
 
     await transporter.sendMail({
@@ -142,8 +146,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json({ ok: true });
   } catch (e) {
     console.error("nodemailer:", e);
-    res.status(500).json({ ok: false, error: "Could not send email. Try again later." });
+    res.status(500).json({
+      ok: false,
+      error: smtpFriendlyError(e),
+    });
   }
+}
+
+function smtpFriendlyError(e: unknown): string {
+  const raw = e instanceof Error ? e.message : String(e);
+  const m = raw.toLowerCase();
+  if (m.includes("invalid login") || m.includes("authentication") || m.includes("eauth") || m.includes("535")) {
+    return "SMTP rejected login. Use a Gmail App Password (16 characters) for SMTP_PASS, and ensure SMTP_USER is the full Gmail address.";
+  }
+  if (m.includes("timeout") || m.includes("etimedout") || m.includes("econnrefused") || m.includes("enotfound")) {
+    return "Could not reach the mail server. Check SMTP_HOST / SMTP_PORT and redeploy.";
+  }
+  if (m.includes("message size") || m.includes("too large")) {
+    return "Attachment too large for the mail server. Try smaller images.";
+  }
+  return "Could not send email. Open Vercel → Deployment → Functions → Logs for /api/contact for details.";
 }
 
 function escapeHtml(s: string): string {
