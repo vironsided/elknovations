@@ -17,6 +17,16 @@ Submissions go to the inbox you use when creating a [Web3Forms](https://web3form
 
 **Security:** `.env` is listed in `.gitignore` — your access key must **never** be committed. If you rotate the key on Web3Forms, update only your local `.env` and the environment variables on your host (Netlify, Vercel, etc.); GitHub stays free of secrets.
 
+### Netlify (`elknovations.netlify.app`)
+
+The live site does **not** use your laptop’s `.env`. You must add the same variable in Netlify so Vite can embed it when building:
+
+1. [Netlify](https://app.netlify.com) → your site → **Site configuration** → **Environment variables**.
+2. **Add a variable**: name `VITE_WEB3FORMS_ACCESS_KEY`, value = your key from [web3forms.com](https://web3forms.com) (same as in local `.env`).
+3. **Save**, then **Deploys** → **Trigger deploy** → **Clear cache and deploy site** (or push a commit so Netlify rebuilds).
+
+Until this is set, the contact form on production will show a configuration message instead of sending.
+
 ---
 
 # React + TypeScript + Vite

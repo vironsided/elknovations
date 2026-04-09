@@ -10,6 +10,13 @@ function getAccessKey(): string {
   return String(import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "").trim();
 }
 
+function missingKeyHelp(): string {
+  if (import.meta.env.PROD) {
+    return "The live site needs your Web3Forms key in Netlify: Site configuration → Environment variables → Add variable VITE_WEB3FORMS_ACCESS_KEY (paste your key from web3forms.com) → Save → Deploys → Trigger deploy (or “Clear cache and deploy site”). Vite reads this at build time.";
+  }
+  return "Email delivery is not configured yet. Add VITE_WEB3FORMS_ACCESS_KEY to a `.env` file in the `web` folder (free key from web3forms.com — use vusal.teymurov520@gmail.com when registering).";
+}
+
 export function Contact() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -60,9 +67,7 @@ export function Contact() {
 
     const key = getAccessKey();
     if (!key) {
-      setSubmitError(
-        "Email delivery is not configured yet. Add VITE_WEB3FORMS_ACCESS_KEY to a `.env` file in the `web` folder (free key from web3forms.com — use vusal.teymurov520@gmail.com when registering).",
-      );
+      setSubmitError(missingKeyHelp());
       return;
     }
 
@@ -298,8 +303,20 @@ export function Contact() {
                   {submitting ? "Sending…" : "Send message"}
                 </button>
                 <p className="text-center text-xs text-neutral-500">
-                  Submissions are sent to {contact.email} via Web3Forms. Add your access key in{" "}
-                  <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">web/.env</code>.
+                  Submissions go to {contact.email} via Web3Forms.
+                  {import.meta.env.PROD ? (
+                    <>
+                      {" "}
+                      On Netlify, set <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">VITE_WEB3FORMS_ACCESS_KEY</code> under
+                      Environment variables and redeploy.
+                    </>
+                  ) : (
+                    <>
+                      {" "}
+                      Locally, add your key in{" "}
+                      <code className="rounded bg-neutral-100 px-1 py-0.5 text-[0.7rem]">web/.env</code>.
+                    </>
+                  )}
                 </p>
               </form>
             )}
