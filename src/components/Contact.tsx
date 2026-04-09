@@ -71,19 +71,26 @@ export function Contact() {
         method: "POST",
         body: fd,
       });
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        missing?: string[];
+      };
 
       if (res.ok && data.ok) {
         setSent(true);
         form.reset();
         clearPhotos();
       } else {
-        setSubmitError(
+        let msg =
           data.error ||
-            (res.status === 503
-              ? "Email is not configured on the server yet."
-              : "Something went wrong. Please try again or email us directly."),
-        );
+          (res.status === 503
+            ? "Email is not configured on the server yet."
+            : "Something went wrong. Please try again or email us directly.");
+        if (data.missing?.length) {
+          msg += ` Missing: ${data.missing.join(", ")}.`;
+        }
+        setSubmitError(msg);
       }
     } catch {
       setSubmitError(

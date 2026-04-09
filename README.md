@@ -20,6 +20,8 @@ Set these in the **Vercel** project → **Settings** → **Environment variables
 
 Redeploy after saving. **Local:** plain `npm run dev` does not run Vercel functions — run `vercel dev` from the `web` folder, or test on the deployed URL.
 
+**If the form returns HTTP 503** (“SMTP is not configured”): the function is running, but one or more variables are missing in Vercel. Open **Settings → Environment variables**, confirm **all four** are present (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_TO_EMAIL`) with **no typos**, scoped to **Production**, then **Redeploy** (Deployments → … → Redeploy). New projects often forget `CONTACT_TO_EMAIL` or paste the Gmail password instead of an [App Password](https://support.google.com/accounts/answer/185833).
+
 **Static hosting only (e.g. Netlify without functions):** you must add an equivalent serverless function or host the API elsewhere; this repo targets Vercel for the contact API.
 
 ---

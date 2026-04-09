@@ -28,17 +28,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const host = process.env.SMTP_HOST;
+  const host = process.env.SMTP_HOST?.trim();
   const port = Number(process.env.SMTP_PORT ?? "587");
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const to = process.env.CONTACT_TO_EMAIL;
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.trim();
+  const to = process.env.CONTACT_TO_EMAIL?.trim();
 
-  if (!host || !user || !pass || !to) {
-    console.error("contact: missing SMTP env (SMTP_HOST, SMTP_USER, SMTP_PASS, CONTACT_TO_EMAIL)");
+  const missing: string[] = [];
+  if (!host) missing.push("SMTP_HOST");
+  if (!user) missing.push("SMTP_USER");
+  if (!pass) missing.push("SMTP_PASS");
+  if (!to) missing.push("CONTACT_TO_EMAIL");
+
+  if (missing.length > 0) {
+    console.error("contact: missing env:", missing.join(", "));
     res.status(503).json({
       ok: false,
-      error: "Email is not configured on the server. Set SMTP variables in the host dashboard.",
+      error:
+        "SMTP is not configured. In Vercel: Project → Settings → Environment Variables — add the missing names below for Production, then redeploy.",
+      missing,
     });
     return;
   }
