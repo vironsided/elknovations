@@ -13,6 +13,8 @@ function contactApiUrl(): string {
 
 export function Contact() {
   const [sent, setSent] = useState(false);
+  /** Gmail: if SMTP_USER === CONTACT_TO_EMAIL, messages often appear only under Sent, not Inbox. */
+  const [sameMailboxHint, setSameMailboxHint] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
@@ -75,9 +77,11 @@ export function Contact() {
         ok?: boolean;
         error?: string;
         missing?: string[];
+        sameMailbox?: boolean;
       };
 
       if (res.ok && data.ok) {
+        setSameMailboxHint(Boolean(data.sameMailbox));
         setSent(true);
         form.reset();
         clearPhotos();
@@ -168,9 +172,20 @@ export function Contact() {
             className="rounded-3xl bg-white p-6 text-neutral-900 shadow-2xl md:p-10"
           >
             {sent ? (
-              <p className="py-12 text-center text-lg text-neutral-600">
-                Thank you — we received your message and will reply shortly.
-              </p>
+              <div className="space-y-4 py-10 text-center">
+                <p className="text-lg text-neutral-600">
+                  Thank you — we received your message and will reply shortly.
+                </p>
+                {sameMailboxHint ? (
+                  <p className="mx-auto max-w-md rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm leading-relaxed text-amber-950">
+                    <strong className="font-semibold">Gmail:</strong> you are sending and receiving on the same address.
+                    New mail often shows only under{" "}
+                    <span className="whitespace-nowrap font-medium">Sent</span>, not Inbox. Check Sent, or set{" "}
+                    <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">CONTACT_TO_EMAIL</code> to a
+                    different inbox (or add <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">CONTACT_BCC_EMAIL</code> in Vercel).
+                  </p>
+                ) : null}
+              </div>
             ) : (
               <form className="relative flex flex-col gap-5" onSubmit={handleSubmit}>
                 <input

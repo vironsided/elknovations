@@ -17,6 +17,10 @@ Set these in the **Vercel** project → **Settings** → **Environment variables
 | `SMTP_PASS` | app password | For Gmail: [App Password](https://support.google.com/accounts/answer/185833) |
 | `CONTACT_TO_EMAIL` | inbox that receives leads | e.g. `vusal.teymurov520@gmail.com` |
 | `SMTP_FROM` | optional | `"Elk Novations" <you@gmail.com>` — defaults to `SMTP_USER` |
+| `SMTP_CLIENT_NAME` | optional | EHLO hostname (FQDN). Default: `elknovations.vercel.app`. Set if mail is accepted but never arrives. |
+| `CONTACT_BCC_EMAIL` | optional | Extra inbox(es), comma-separated — copy of every lead (useful if `SMTP_USER` and `CONTACT_TO_EMAIL` are the same Gmail). |
+
+**Same Gmail for SMTP and inbox:** If `SMTP_USER` and `CONTACT_TO_EMAIL` are the same address, Gmail often does **not** show the message in **Inbox** — look in **Sent**, or use another address for `CONTACT_TO_EMAIL`, or set `CONTACT_BCC_EMAIL` to a second mailbox.
 
 Redeploy after saving. **Local:** plain `npm run dev` does not run Vercel functions — run `vercel dev` from the `web` folder, or test on the deployed URL.
 

@@ -17,6 +17,15 @@ function normalizeFiles(files: formidable.Files, key: string): FormidableFile[] 
   return Array.isArray(raw) ? raw : [raw];
 }
 
+/** Comma-separated addresses from env (optional BCC). */
+function parseAddressList(raw: string | undefined): string[] {
+  if (!raw?.trim()) return [];
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") {
     res.status(204).end();
@@ -122,20 +131,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 <hr />
 <p>${escapeHtml(message).replace(/\n/g, "<br/>")}</p>`;
 
+  const bcc = parseAddressList(process.env.CONTACT_BCC_EMAIL);
+  /** Vercel/serverless often has a random hostname; EHLO must look like a real FQDN or some providers drop mail. */
+  const clientName = process.env.SMTP_CLIENT_NAME?.trim() || "elknovations.vercel.app";
+
   try {
     const transporter = nodemailer.createTransport({
       host,
       port,
       secure,
+      name: clientName,
       auth: { user, pass },
       requireTLS: !secure && port === 587,
       tls: { minVersion: "TLSv1.2" },
       connectionTimeout: 25_000,
     });
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: process.env.SMTP_FROM ?? `"Elk Novations site" <${user}>`,
       to,
+      bcc: bcc.length ? bcc : undefined,
       replyTo: email,
       subject: `Elk Novations — contact from ${name}`,
       text,
@@ -143,7 +158,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       attachments: attachments.length ? attachments : undefined,
     });
 
-    res.status(200).json({ ok: true });
+    const sameMailbox = user!.toLowerCase() === to!.toLowerCase();
+    console.info("contact: sent", {
+      messageId: info.messageId,
+      to,
+      sameMailbox,
+      bccCount: bcc.length,
+    });
+
+    res.status(200).json({
+      ok: true,
+      messageId: info.messageId,
+      sameMailbox,
+    });
   } catch (e) {
     console.error("nodemailer:", e);
     res.status(500).json({
