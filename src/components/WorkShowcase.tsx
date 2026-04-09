@@ -39,23 +39,25 @@ function StackCard({
   const isDark = project.theme === "dark";
 
   return (
-    <div className="w-full px-5 py-10 md:px-10 lg:px-14">
+    <div className="w-full px-3 py-8 sm:px-4 md:px-6 lg:px-8">
       <motion.div
         style={{ scale }}
-        className="mx-auto w-full max-w-5xl origin-center will-change-transform"
+        className="mx-auto w-full max-w-[min(100%,1800px)] origin-center will-change-transform"
       >
         <article
-          className={`relative overflow-hidden rounded-3xl border border-neutral-200/80 shadow-xl ${
+          className={`relative overflow-hidden rounded-2xl border border-neutral-200/80 shadow-xl sm:rounded-3xl ${
             isDark ? "bg-neutral-950 text-white" : "bg-neutral-100 text-neutral-900"
           }`}
         >
           <div className="grid gap-0 md:grid-cols-2">
-            <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[380px]">
+            <div className="relative aspect-[4/3] bg-neutral-200/80 md:aspect-auto md:min-h-[380px]">
               <img
                 src={project.image}
                 alt=""
                 className="h-full w-full object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+                referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
             <div className="flex flex-col justify-center p-8 md:p-12">

@@ -157,7 +157,7 @@ export const projects = [
       "The new bathroom feels like a retreat. Quality work and zero surprises on communication.",
     author: "Laura Davies",
     image:
-      "https://images.unsplash.com/photo-1600566752355-35792bedcfe1?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&w=1200&q=80",
     theme: "light" as const,
   },
 ];
