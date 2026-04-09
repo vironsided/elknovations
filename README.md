@@ -15,7 +15,7 @@ Submissions go to the inbox you use when creating a [Web3Forms](https://web3form
 
 3. Restart the dev server (`npm run dev`) or rebuild (`npm run build`).
 
-The static site in the parent folder uses the same service via `assets/js/main.js` — paste the same key into `WEB3FORMS_ACCESS_KEY` there.
+**Security:** `.env` is listed in `.gitignore` — your access key must **never** be committed. If you rotate the key on Web3Forms, update only your local `.env` and the environment variables on your host (Netlify, Vercel, etc.); GitHub stays free of secrets.
 
 ---
 
