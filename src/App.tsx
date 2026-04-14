@@ -9,6 +9,7 @@ const ProjectsManager = lazy(() => import("./components/admin/ProjectsManager").
 const ServicesManager = lazy(() => import("./components/admin/ServicesManager").then((m) => ({ default: m.ServicesManager })));
 const FaqManager = lazy(() => import("./components/admin/FaqManager").then((m) => ({ default: m.FaqManager })));
 const TestimonialsManager = lazy(() => import("./components/admin/TestimonialsManager").then((m) => ({ default: m.TestimonialsManager })));
+const SocialLinksManager = lazy(() => import("./components/admin/SocialLinksManager").then((m) => ({ default: m.SocialLinksManager })));
 const SiteSettings = lazy(() => import("./components/admin/SiteSettings").then((m) => ({ default: m.SiteSettings })));
 const ProtectedRoute = lazy(() => import("./components/ui/ProtectedRoute").then((m) => ({ default: m.ProtectedRoute })));
 
@@ -41,6 +42,7 @@ function App() {
             <Route path="services" element={<ServicesManager />} />
             <Route path="faqs" element={<FaqManager />} />
             <Route path="testimonials" element={<TestimonialsManager />} />
+            <Route path="social-links" element={<SocialLinksManager />} />
             <Route path="settings" element={<SiteSettings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

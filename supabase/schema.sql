@@ -51,6 +51,15 @@ create table if not exists testimonials (
   created_at timestamptz not null default now()
 );
 
+-- 6. social_links
+create table if not exists social_links (
+  id         uuid primary key default gen_random_uuid(),
+  platform   text not null,
+  url        text not null default '',
+  sort_order int  not null default 0,
+  created_at timestamptz not null default now()
+);
+
 -- Row Level Security ----------------------------------------------------------
 
 alter table site_settings enable row level security;
@@ -58,6 +67,7 @@ alter table services      enable row level security;
 alter table projects      enable row level security;
 alter table faqs          enable row level security;
 alter table testimonials  enable row level security;
+alter table social_links  enable row level security;
 
 -- Public read for everyone
 create policy "Public read site_settings" on site_settings for select using (true);
@@ -65,6 +75,7 @@ create policy "Public read services"      on services      for select using (tru
 create policy "Public read projects"      on projects      for select using (true);
 create policy "Public read faqs"          on faqs          for select using (true);
 create policy "Public read testimonials"  on testimonials  for select using (true);
+create policy "Public read social_links"  on social_links  for select using (true);
 
 -- Authenticated users (admin) can do everything
 create policy "Admin write site_settings" on site_settings for all using (auth.role() = 'authenticated');
@@ -72,6 +83,7 @@ create policy "Admin write services"      on services      for all using (auth.r
 create policy "Admin write projects"      on projects      for all using (auth.role() = 'authenticated');
 create policy "Admin write faqs"          on faqs          for all using (auth.role() = 'authenticated');
 create policy "Admin write testimonials"  on testimonials  for all using (auth.role() = 'authenticated');
+create policy "Admin write social_links"  on social_links  for all using (auth.role() = 'authenticated');
 
 -- Storage bucket for images ---------------------------------------------------
 -- Run this AFTER creating a bucket named "images" in Storage (Dashboard → Storage → New bucket → name: images, public: ON)

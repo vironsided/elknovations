@@ -6,6 +6,7 @@ import {
   HelpCircle,
   MessageSquareQuote,
   Settings,
+  Share2,
   LogOut,
   ArrowLeft,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const links = [
   { to: "/admin/services", label: "Services", icon: Wrench },
   { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
   { to: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+  { to: "/admin/social-links", label: "Social Links", icon: Share2 },
   { to: "/admin/settings", label: "Site Settings", icon: Settings },
 ];
 

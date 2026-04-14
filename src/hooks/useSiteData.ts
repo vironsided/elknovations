@@ -28,6 +28,7 @@ export type Project = {
 
 export type FAQ = { id: string; question: string; answer: string; sort_order: number };
 export type Testimonial = { id: string; name: string; text: string; sort_order: number };
+export type SocialLink = { id: string; platform: string; url: string; sort_order: number };
 
 type SiteSettings = Record<string, unknown>;
 
@@ -125,6 +126,10 @@ export function useAbout() { return useSetting("about", fallbackAbout); }
 export function useContact() { return useSetting("contact", fallbackContact); }
 export function useStats() {
   return useSetting("stats", fallbackStats);
+}
+
+export function useSocialLinks() {
+  return useFetch<SocialLink>("social_links", []);
 }
 
 export function useSettings(key: string) {
