@@ -6,9 +6,7 @@ import {
   useMotionValueEvent,
   type MotionValue,
 } from "framer-motion";
-import { projects } from "../data/site";
-
-type Project = (typeof projects)[number];
+import { useProjects, type Project } from "../hooks/useSiteData";
 
 function StackCard({
   project,
@@ -36,6 +34,7 @@ function StackCard({
     return 1 - (1 - minScale) * ((v - start) / (end - start));
   });
 
+  const img = (project as { image_url?: string; image?: string }).image_url || (project as { image?: string }).image || "";
   const isDark = project.theme === "dark";
 
   return (
@@ -52,7 +51,7 @@ function StackCard({
           <div className="grid gap-0 md:grid-cols-2">
             <div className="relative aspect-[4/3] bg-neutral-200/80 md:aspect-auto md:min-h-[380px]">
               <img
-                src={project.image}
+                src={img}
                 alt=""
                 className="h-full w-full object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
@@ -107,6 +106,7 @@ function StackCard({
 }
 
 export function WorkShowcase() {
+  const { data: projects } = useProjects();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const n = projects.length;

@@ -1,114 +1,106 @@
-# Elk Novations — marketing site (React)
+# Elk Novations — marketing site + admin panel
 
-The parent folder (`elknovations`) contains only this project — the old static `index.html` and `assets/` copy were removed to avoid duplication.
+React 19 + TypeScript + Vite + Tailwind v4 + Framer Motion.  
+Admin panel backed by **Supabase** (free tier) for managing all site content.
 
-## Contact form email (Web3Forms)
+## Quick start
 
-Submissions go to the inbox you use when creating a [Web3Forms](https://web3forms.com) access key (use **vusal.teymurov520@gmail.com** so leads arrive there).
+```bash
+cd web
+npm install
+npm run dev        # main site at http://localhost:5173
+```
 
-The contact form sends **text fields only** on the free tier. [File attachments](https://docs.web3forms.com/getting-started/pro-features/file-attachments) are a Web3Forms **Pro** feature; visitors can paste links to photos in the message instead.
+## Environment variables
 
-1. Open [web3forms.com](https://web3forms.com), enter that email, and copy your **Access Key**.
-2. In the `web` folder, create a file named `.env` (see `.env.example`):
+Create a `.env` file in the `web` folder (see `.env.example`):
 
-   ```env
-   VITE_WEB3FORMS_ACCESS_KEY=paste_your_key_here
-   ```
+```env
+VITE_WEB3FORMS_ACCESS_KEY=your_key_here
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+```
 
-3. Restart the dev server (`npm run dev`) or rebuild (`npm run build`).
+| Variable | Where to get it | Required |
+|----------|----------------|----------|
+| `VITE_WEB3FORMS_ACCESS_KEY` | [web3forms.com](https://web3forms.com) | Yes (contact form) |
+| `VITE_SUPABASE_URL` | Supabase project → Settings → API | For admin panel |
+| `VITE_SUPABASE_ANON_KEY` | Supabase project → Settings → API | For admin panel |
 
-**Security:** `.env` is listed in `.gitignore` — your access key must **never** be committed. If you rotate the key on Web3Forms, update only your local `.env` and the environment variables on your host (Netlify, Vercel, etc.); GitHub stays free of secrets.
-
-### Vercel
-
-The live build does **not** use your laptop’s `.env`. Add **`VITE_WEB3FORMS_ACCESS_KEY`** in the Vercel project → **Settings** → **Environment variables** (same value as [web3forms.com](https://web3forms.com)), for **Production** (or **All Environments**), **Save**, then **Deployments** → **Redeploy**.
-
-### Netlify (`elknovations.netlify.app`)
-
-The live site does **not** use your laptop’s `.env`. You must add the same variable in Netlify so Vite can embed it when building:
-
-1. [Netlify](https://app.netlify.com) → your site → **Site configuration** → **Environment variables**.
-2. **Add a variable**: name `VITE_WEB3FORMS_ACCESS_KEY`, value = your key from [web3forms.com](https://web3forms.com) (same as in local `.env`).
-3. **Save**, then **Deploys** → **Trigger deploy** → **Clear cache and deploy site** (or push a commit so Netlify rebuilds).
-
-Until this is set, the contact form on production will show a configuration message instead of sending.
-
-If the variable is missing during `npm run build`, the build **fails** with an explicit error (so Netlify logs show the problem instead of publishing a broken form).
-
-**Troubleshooting:** If you still see “needs your Web3Forms key” after adding the variable, check: (1) name is exactly `VITE_WEB3FORMS_ACCESS_KEY` (including `VITE_`), (2) it is under **this site’s** Environment variables, not only account-wide, (3) you ran a **new deploy** after saving (Deploys → Trigger deploy → Clear cache and deploy), (4) the variable’s **scope** includes **Production** — in Netlify you can limit a variable to “Deploy Previews” or specific branches only; if Production is unchecked, production builds still get an empty value.
+Without Supabase env vars the main site works fine using hardcoded fallback data from `src/data/site.ts`. The admin panel requires Supabase to be connected.
 
 ---
 
-# React + TypeScript + Vite
+## Admin panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### 1. Create a Supabase project (free, no credit card)
 
-Currently, two official plugins are available:
+1. Go to [supabase.com](https://supabase.com) and sign in with GitHub.
+2. Click **New project** → pick a name and region → create.
+3. Go to **Settings → API** and copy:
+   - **Project URL** → `VITE_SUPABASE_URL`
+   - **anon / public** key → `VITE_SUPABASE_ANON_KEY`
+4. Add both to your `.env` (local) and Vercel environment variables (production).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 2. Run the database schema
 
-## React Compiler
+1. In Supabase dashboard → **SQL Editor** → **New query**.
+2. Paste the contents of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
+3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, plus RLS policies and a public `images` storage bucket.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3. Create the admin user
 
-## Expanding the ESLint configuration
+1. In Supabase dashboard → **Authentication** → **Users** → **Add user** → **Create new user**.
+2. Enter the admin email and password.
+3. That's the only account — no registration on the site.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 4. Access the admin panel
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Local:** `http://localhost:5173/admin/login`
+- **Production:** `https://elknovations.com/admin/login`
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Log in with the email/password from step 3. The dashboard lets you manage:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Projects** — add/edit/delete showcase projects with images
+- **Services** — manage service offerings with icon picker
+- **FAQs** — add/edit/delete questions and answers
+- **Testimonials** — manage client reviews
+- **Site Settings** — edit brand name, tagline, hero section, about text, contact info, stats
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Contact form (Web3Forms)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The contact form POSTs to [Web3Forms](https://web3forms.com) (free tier, text only).
+
+1. Open [web3forms.com](https://web3forms.com), enter the inbox email, and copy the **Access Key**.
+2. Set `VITE_WEB3FORMS_ACCESS_KEY` in `.env` locally and in Vercel environment variables for production.
+
+---
+
+## Deploy to elknovations.com
+
+The site is hosted on **Vercel** (free). The domain is on **GoDaddy**.
+
+### Connect GoDaddy domain to Vercel
+
+1. In **Vercel** → project → **Settings** → **Domains** → add `elknovations.com`.
+2. Vercel will show DNS records to add. In **GoDaddy** → DNS Management:
+   - Add **A record**: `@` → `76.76.21.21`
+   - Add **CNAME**: `www` → `cname.vercel-dns.com`
+3. Save. SSL is auto-provisioned by Vercel (can take a few minutes).
+
+### Vercel environment variables
+
+Add all three `VITE_*` variables in Vercel → Settings → Environment Variables for **Production** (or All Environments), then **Redeploy**.
+
+---
+
+## Tech stack
+
+- **React 19** + TypeScript + Vite
+- **Tailwind CSS v4** + Framer Motion
+- **Lucide React** for icons
+- **Supabase** (PostgreSQL + Auth + Storage) — free tier
+- **Web3Forms** for contact form
+- **React Router** for `/` (main site) and `/admin/*` (admin panel)

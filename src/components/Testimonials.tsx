@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { testimonials } from "../data/site";
+import { useTestimonials } from "../hooks/useSiteData";
 
 function StarRow() {
   return (
@@ -12,6 +12,7 @@ function StarRow() {
 }
 
 export function Testimonials() {
+  const { data: testimonials } = useTestimonials();
   const rowForward = [...testimonials, ...testimonials];
   const reversed = [...testimonials].reverse();
   const rowReverse = [...reversed, ...reversed];

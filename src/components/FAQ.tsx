@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { faqs } from "../data/site";
+import { ArrowUpRight } from "lucide-react";
+import { useFaqs } from "../hooks/useSiteData";
 
 export function FAQ() {
+  const { data: faqItems } = useFaqs();
   const [open, setOpen] = useState<number | null>(0);
 
   return (
@@ -28,25 +30,19 @@ export function FAQ() {
           >
             Get in touch
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="M7 17L17 7M17 7H9M17 7V15"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ArrowUpRight size={14} strokeWidth={2} aria-hidden />
             </span>
           </a>
         </motion.div>
 
         <div className="flex flex-col gap-3 lg:col-span-8">
-          {faqs.map((item, i) => {
+          {faqItems.map((item, i) => {
             const isOpen = open === i;
+            const q = (item as { question?: string; q?: string }).question ?? (item as { q?: string }).q ?? "";
+            const a = (item as { answer?: string; a?: string }).answer ?? (item as { a?: string }).a ?? "";
             return (
               <motion.div
-                key={item.q}
+                key={q}
                 layout
                 className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-neutral-50"
                 initial={{ opacity: 0, y: 12 }}
@@ -59,7 +55,7 @@ export function FAQ() {
                   onClick={() => setOpen(isOpen ? null : i)}
                   className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left md:px-6 md:py-5"
                 >
-                  <span className="text-base font-semibold text-black md:text-lg">{item.q}</span>
+                  <span className="text-base font-semibold text-black md:text-lg">{q}</span>
                   <span className="shrink-0 text-xl font-light text-neutral-400" aria-hidden>
                     {isOpen ? "×" : "+"}
                   </span>
@@ -74,7 +70,7 @@ export function FAQ() {
                       className="overflow-hidden"
                     >
                       <p className="px-5 pb-5 text-sm leading-relaxed text-neutral-600 md:px-6 md:pb-6 md:text-base">
-                        {item.a}
+                        {a}
                       </p>
                     </motion.div>
                   )}

@@ -67,11 +67,13 @@ export type ServiceItem = {
   title: string;
   description: string;
   image: string;
+  icon: string;
 };
 
 export const services: ServiceItem[] = [
   {
     id: "kitchens",
+    icon: "CookingPot",
     title: "Kitchens",
     description:
       "We design and build kitchens tailored to your lifestyle—layout, cabinetry, lighting, and finishes that make the heart of your home work beautifully every day.",
@@ -80,6 +82,7 @@ export const services: ServiceItem[] = [
   },
   {
     id: "loft",
+    icon: "Building2",
     title: "Loft conversions",
     description:
       "Unlock extra living space with a bespoke loft conversion—bedroom, office, or studio—planned for comfort, code, and long-term value.",
@@ -88,6 +91,7 @@ export const services: ServiceItem[] = [
   },
   {
     id: "bathrooms",
+    icon: "Bath",
     title: "Bathrooms",
     description:
       "From efficient family baths to spa-like suites—we handle waterproofing, fixtures, tile, and lighting with meticulous detail.",
@@ -96,6 +100,7 @@ export const services: ServiceItem[] = [
   },
   {
     id: "extensions",
+    icon: "Home",
     title: "Extensions",
     description:
       "Seamless home extensions that match your home’s character while adding the square footage you need—structurally sound and energy-smart.",
@@ -104,6 +109,7 @@ export const services: ServiceItem[] = [
   },
   {
     id: "restorations",
+    icon: "Paintbrush",
     title: "Restorations",
     description:
       "Preserve character while upgrading systems and finishes—we balance heritage detail with modern comfort and durability.",
@@ -112,6 +118,7 @@ export const services: ServiceItem[] = [
   },
   {
     id: "external",
+    icon: "Fence",
     title: "External works",
     description:
       "Driveways, patios, decks, and façades—outdoor spaces built to weather beautifully and elevate curb appeal.",

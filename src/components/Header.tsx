@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { brand, nav } from "../data/site";
+import { nav } from "../data/site";
+import { useBrand } from "../hooks/useSiteData";
 
 function scrollToSection(href: string) {
   const id = href.replace(/^#/, "");
@@ -11,6 +12,7 @@ function scrollToSection(href: string) {
 }
 
 export function Header() {
+  const { data: brand } = useBrand();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (

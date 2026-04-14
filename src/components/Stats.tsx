@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
-import { stats } from "../data/site";
+import { useStats } from "../hooks/useSiteData";
 
 export function Stats() {
+  const { data: stats } = useStats();
+
   return (
     <section className="border-y border-neutral-200 bg-white px-5 py-16 md:px-10 lg:px-14 lg:py-20">
       <div className="mx-auto grid max-w-[1400px] gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">

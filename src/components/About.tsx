@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { about, galleryImages } from "../data/site";
+import { galleryImages } from "../data/site";
+import { useAbout } from "../hooks/useSiteData";
 
 const container = {
   hidden: {},
@@ -18,6 +19,8 @@ const item = {
 };
 
 export function About() {
+  const { data: about } = useAbout();
+
   return (
     <section id="about" className="scroll-mt-24 bg-white py-20 md:py-24 lg:py-28">
       <div className="mx-auto max-w-[1400px] px-5 md:px-10 lg:px-14">

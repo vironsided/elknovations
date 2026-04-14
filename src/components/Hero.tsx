@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { brand, hero } from "../data/site";
+import { ArrowUpRight } from "lucide-react";
+import { useBrand, useHero } from "../hooks/useSiteData";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -11,6 +12,9 @@ const fadeUp = {
 };
 
 export function Hero() {
+  const { data: brand } = useBrand();
+  const { data: hero } = useHero();
+
   return (
     <section id="hero" className="relative bg-black pb-6 pt-[4.5rem] md:px-6 lg:px-8 lg:pb-8">
       {/*
@@ -58,15 +62,7 @@ export function Hero() {
               >
                 {hero.cta}
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition group-hover:scale-105">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path
-                      d="M7 17L17 7M17 7H9M17 7V15"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <ArrowUpRight size={16} strokeWidth={2} aria-hidden />
                 </span>
               </a>
             </motion.div>
