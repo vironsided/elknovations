@@ -4,6 +4,9 @@ import { footerLinks } from "../data/site";
 import { useBrand, useContact, useSocialLinks } from "../hooks/useSiteData";
 
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+const MAX_ATTACHMENTS = 3;
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+const ATTACHMENTS_HINT = "Up to 3 files, max 10MB each (images, PDF, DOC, DOCX).";
 
 function getAccessKey(): string {
   return String(import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "").trim();
@@ -89,6 +92,19 @@ export function Contact() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  function getAttachmentError(files: FileList | null): string | null {
+    if (!files || files.length === 0) return null;
+    if (files.length > MAX_ATTACHMENTS) {
+      return `Please attach up to ${MAX_ATTACHMENTS} files only.`;
+    }
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_ATTACHMENT_BYTES) {
+        return `File "${file.name}" is too large. Max size is 10MB per file.`;
+      }
+    }
+    return null;
+  }
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
@@ -101,6 +117,13 @@ export function Contact() {
 
     setSubmitting(true);
     const form = e.currentTarget;
+    const attachmentsInput = form.elements.namedItem("attachments") as HTMLInputElement | null;
+    const attachmentError = getAttachmentError(attachmentsInput?.files ?? null);
+    if (attachmentError) {
+      setSubmitError(attachmentError);
+      setSubmitting(false);
+      return;
+    }
     const fd = new FormData(form);
     fd.append("access_key", key);
     fd.append("subject", "Elk Novations — Website contact form");
@@ -266,8 +289,21 @@ export function Contact() {
                     className="w-full resize-y rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black"
                     placeholder="Tell us about your project…"
                   />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium" htmlFor="attachments">
+                    Attachments
+                  </label>
+                  <input
+                    id="attachments"
+                    name="attachments"
+                    type="file"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx"
+                    className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-900 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-black"
+                  />
                   <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                    The free Web3Forms tier sends text only — paste links to photos if needed.
+                    {ATTACHMENTS_HINT}
                   </p>
                 </div>
                 {submitError && (
