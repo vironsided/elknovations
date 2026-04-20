@@ -11,6 +11,7 @@ const ServicesManager = lazy(() => import("./components/admin/ServicesManager").
 const FaqManager = lazy(() => import("./components/admin/FaqManager").then((m) => ({ default: m.FaqManager })));
 const TestimonialsManager = lazy(() => import("./components/admin/TestimonialsManager").then((m) => ({ default: m.TestimonialsManager })));
 const WorkCategoriesManager = lazy(() => import("./components/admin/WorkCategoriesManager").then((m) => ({ default: m.WorkCategoriesManager })));
+const WorkCasesManager = lazy(() => import("./components/admin/WorkCasesManager").then((m) => ({ default: m.WorkCasesManager })));
 const SocialLinksManager = lazy(() => import("./components/admin/SocialLinksManager").then((m) => ({ default: m.SocialLinksManager })));
 const SiteSettings = lazy(() => import("./components/admin/SiteSettings").then((m) => ({ default: m.SiteSettings })));
 const ProtectedRoute = lazy(() => import("./components/ui/ProtectedRoute").then((m) => ({ default: m.ProtectedRoute })));
@@ -46,6 +47,7 @@ function App() {
             <Route path="faqs" element={<FaqManager />} />
             <Route path="testimonials" element={<TestimonialsManager />} />
             <Route path="work-categories" element={<WorkCategoriesManager />} />
+            <Route path="work-cases" element={<WorkCasesManager />} />
             <Route path="social-links" element={<SocialLinksManager />} />
             <Route path="settings" element={<SiteSettings />} />
           </Route>

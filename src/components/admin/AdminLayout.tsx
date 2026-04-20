@@ -6,6 +6,7 @@ import {
   HelpCircle,
   MessageSquareQuote,
   Tags,
+  Images,
   Settings,
   Share2,
   LogOut,
@@ -20,6 +21,7 @@ const links = [
   { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
   { to: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { to: "/admin/work-categories", label: "Work Categories", icon: Tags },
+  { to: "/admin/work-cases", label: "Work Cases", icon: Images },
   { to: "/admin/social-links", label: "Social Links", icon: Share2 },
   { to: "/admin/settings", label: "Site Settings", icon: Settings },
 ];

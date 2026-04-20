@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useId, useState, useRef } from "react";
 import { Upload, X } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
@@ -13,6 +13,7 @@ export function ImageUpload({ currentUrl, onUploaded, bucket = "images", folder 
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(currentUrl);
   const fileRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
   async function handleFile(file: File) {
     setUploading(true);
@@ -69,10 +70,10 @@ export function ImageUpload({ currentUrl, onUploaded, bucket = "images", folder 
           accept="image/*"
           onChange={handleChange}
           className="hidden"
-          id="img-upload"
+          id={inputId}
         />
         <label
-          htmlFor="img-upload"
+          htmlFor={inputId}
           className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
         >
           <Upload size={16} />
