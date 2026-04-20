@@ -6,14 +6,13 @@ Admin panel backed by **Supabase** (free tier) for managing all site content.
 ## Quick start
 
 ```bash
-cd web
 npm install
 npm run dev        # main site at http://localhost:5173
 ```
 
 ## Environment variables
 
-Create a `.env` file in the `web` folder (see `.env.example`):
+Create a `.env` file in the project root (see `.env.example`):
 
 ```env
 VITE_WEB3FORMS_ACCESS_KEY=your_key_here
@@ -46,7 +45,7 @@ Without Supabase env vars the main site works fine using hardcoded fallback data
 
 1. In Supabase dashboard → **SQL Editor** → **New query**.
 2. Paste the contents of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
-3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, plus RLS policies and a public `images` storage bucket.
+3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, `social_links`, `work_categories`, `work_cases`, plus RLS policies and a public `images` storage bucket.
 
 ### 3. Create the admin user
 
@@ -62,10 +61,26 @@ Without Supabase env vars the main site works fine using hardcoded fallback data
 Log in with the email/password from step 3. The dashboard lets you manage:
 
 - **Projects** — add/edit/delete showcase projects with images
+- **Work Categories** — create/edit/remove categories for the full `/work` page
+- **Work Cases** — manage before/after projects with location, date, scope, materials, and price
 - **Services** — manage service offerings with icon picker
 - **FAQs** — add/edit/delete questions and answers
 - **Testimonials** — manage client reviews
+- **Social Links** — choose social platforms and links for "Follow us"
 - **Site Settings** — edit brand name, tagline, hero section, about text, contact info, stats
+
+### 5. Full work catalog page (`/work`)
+
+- Main homepage keeps the existing `Our work` showcase.
+- "View all projects" button opens `/work`.
+- `/work` includes:
+  - category filters from `work_categories`,
+  - before/after cards from `work_cases`,
+  - detailed scope, materials, location, completion date, and average price.
+
+Recommended setup order in admin panel:
+1. Create categories in **Work Categories**.
+2. Add portfolio items in **Work Cases** and assign category.
 
 ---
 
@@ -103,4 +118,4 @@ Add all three `VITE_*` variables in Vercel → Settings → Environment Variable
 - **Lucide React** for icons
 - **Supabase** (PostgreSQL + Auth + Storage) — free tier
 - **Web3Forms** for contact form
-- **React Router** for `/` (main site) and `/admin/*` (admin panel)
+- **React Router** for `/` (main site), `/work` (full portfolio), and `/admin/*` (admin panel)
