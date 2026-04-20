@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useProjects, type Project } from "../hooks/useSiteData";
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
@@ -111,6 +112,12 @@ export function WorkShowcase() {
           <p className="mt-4 text-lg text-neutral-600">
             See how we transform homes with craftsmanship and attention to detail.
           </p>
+          <Link
+            to="/work"
+            className="mt-6 inline-flex rounded-xl bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800"
+          >
+            View all projects
+          </Link>
         </motion.div>
 
         <div className="mt-14 flex flex-col gap-10">
