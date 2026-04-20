@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainSite } from "./components/MainSite";
+const WorkPage = lazy(() => import("./components/WorkPage").then((m) => ({ default: m.WorkPage })));
 
 const Login = lazy(() => import("./components/admin/Login").then((m) => ({ default: m.Login })));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
@@ -27,6 +28,7 @@ function App() {
       <Suspense fallback={<Spinner />}>
         <Routes>
           <Route path="/" element={<MainSite />} />
+          <Route path="/work" element={<WorkPage />} />
           <Route path="/admin/login" element={<Login />} />
           <Route
             path="/admin"
