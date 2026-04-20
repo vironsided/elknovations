@@ -29,6 +29,22 @@ export type Project = {
 export type FAQ = { id: string; question: string; answer: string; sort_order: number };
 export type Testimonial = { id: string; name: string; text: string; sort_order: number };
 export type SocialLink = { id: string; platform: string; url: string; sort_order: number };
+export type WorkCategory = { id: string; name: string; slug: string; sort_order: number };
+export type WorkCase = {
+  id: string;
+  category_id: string | null;
+  title: string;
+  location: string;
+  completed_at: string | null;
+  summary: string;
+  scope_details: string;
+  materials: string;
+  total_price_usd: number;
+  before_image_url: string;
+  after_image_url: string;
+  sort_order: number;
+  work_categories?: { id: string; name: string; slug: string } | null;
+};
 
 type SiteSettings = Record<string, unknown>;
 
@@ -130,6 +146,37 @@ export function useStats() {
 
 export function useSocialLinks() {
   return useFetch<SocialLink>("social_links", []);
+}
+
+export function useWorkCategories() {
+  return useFetch<WorkCategory>("work_categories", []);
+}
+
+export function useWorkCases(selectedCategory = "all"): { data: WorkCase[]; loading: boolean } {
+  const [data, setData] = useState<WorkCase[]>([]);
+  const [loading, setLoading] = useState(supabaseConfigured);
+
+  useEffect(() => {
+    if (!supabaseConfigured) return;
+    let cancelled = false;
+    (async () => {
+      let query = supabase
+        .from("work_cases")
+        .select("*, work_categories(id, name, slug)")
+        .order("sort_order");
+
+      if (selectedCategory !== "all") {
+        query = query.eq("category_id", selectedCategory);
+      }
+
+      const { data: rows } = await query;
+      if (!cancelled && rows) setData(rows as WorkCase[]);
+      if (!cancelled) setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [selectedCategory]);
+
+  return { data, loading };
 }
 
 export function useSettings(key: string) {
