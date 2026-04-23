@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, Star, X } from "lucide-react";
 import { useGoogleReviews, useWorkCases } from "../../hooks/useSiteData";
 import { ReviewsSlider } from "./ReviewsSlider";
 import { ProjectsSlider } from "./ProjectsSlider";
-import { WorkMap } from "./WorkMap";
+
+const WorkMap = lazy(() =>
+  import("./WorkMap").then((m) => ({ default: m.WorkMap })),
+);
 
 type Props = {
   open: boolean;
@@ -188,7 +191,15 @@ export function WorkNearYouDrawer({ open, onClose }: Props) {
                     </p>
                   </div>
                   <div className="min-h-[360px] flex-1 overflow-hidden rounded-2xl border border-neutral-200 lg:min-h-[540px]">
-                    <WorkMap cases={pinnedCases} />
+                    <Suspense
+                      fallback={
+                        <div className="flex h-full min-h-[360px] items-center justify-center bg-neutral-100 text-sm text-neutral-500">
+                          Loading map…
+                        </div>
+                      }
+                    >
+                      <WorkMap cases={pinnedCases} />
+                    </Suspense>
                   </div>
                 </section>
               </div>
