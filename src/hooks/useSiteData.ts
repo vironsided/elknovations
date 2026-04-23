@@ -42,8 +42,21 @@ export type WorkCase = {
   total_price_usd: number;
   before_image_url: string;
   after_image_url: string;
+  latitude: number | null;
+  longitude: number | null;
   sort_order: number;
   work_categories?: { id: string; name: string; slug: string } | null;
+};
+
+export type GoogleReview = {
+  id: string;
+  author_name: string;
+  author_initial: string;
+  rating: number;
+  review_text: string;
+  review_date: string;
+  avatar_color: string;
+  sort_order: number;
 };
 
 type SiteSettings = Record<string, unknown>;
@@ -181,4 +194,8 @@ export function useWorkCases(selectedCategory = "all"): { data: WorkCase[]; load
 
 export function useSettings(key: string) {
   return useSetting<SiteSettings>(key, {});
+}
+
+export function useGoogleReviews() {
+  return useFetch<GoogleReview>("google_reviews", []);
 }
