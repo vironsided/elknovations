@@ -2,22 +2,23 @@ import { MapPin } from "lucide-react";
 
 type Props = { onOpen: () => void };
 
+/** Right-edge tab — matches common “contractor / REALWORK” style (blue, vertical label). */
 export function WorkNearYouTab({ onOpen }: Props) {
   return (
     <button
       type="button"
       onClick={onOpen}
       aria-label="See work near you"
-      className="fixed left-0 top-1/2 z-40 -translate-y-1/2 group flex items-center gap-2 rounded-r-2xl bg-black py-4 pl-2 pr-3 text-white shadow-lg shadow-black/20 transition hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-black/40"
+      className="group fixed right-0 top-1/2 z-40 -translate-y-1/2 flex items-center gap-2 rounded-l-2xl border border-blue-600/20 bg-gradient-to-b from-blue-600 to-blue-700 py-4 pl-3 pr-2 text-white shadow-[0_8px_30px_rgba(37,99,235,0.35)] transition hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400/60"
     >
-      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-        <MapPin className="h-4 w-4" aria-hidden="true" />
-      </span>
       <span
-        className="text-xs font-semibold uppercase tracking-[0.2em]"
+        className="text-[0.7rem] font-bold uppercase leading-tight tracking-[0.18em] text-white/95 [text-shadow:0_1px_2px_rgba(0,0,0,0.15)]"
         style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
       >
         See work near you
+      </span>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
+        <MapPin className="h-4 w-4" aria-hidden="true" />
       </span>
     </button>
   );

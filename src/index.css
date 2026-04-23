@@ -92,3 +92,9 @@ body {
     animation-play-state: running;
   }
 }
+
+/* Leaflet: custom numbered pins (WorkMap) */
+.leaflet-container .wny-map-pin {
+  background: transparent !important;
+  border: none !important;
+}

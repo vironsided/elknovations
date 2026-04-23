@@ -32,7 +32,7 @@ function GoogleG() {
   return (
     <svg
       viewBox="0 0 48 48"
-      className="h-4 w-4"
+      className="h-4 w-4 shrink-0"
       aria-label="Google"
       role="img"
     >
@@ -63,9 +63,9 @@ function Stars({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
-          className={`h-4 w-4 ${
+          className={`h-3.5 w-3.5 ${
             i < clamped
-              ? "fill-yellow-400 text-yellow-400"
+              ? "fill-amber-400 text-amber-400"
               : "fill-neutral-200 text-neutral-200"
           }`}
         />
@@ -77,79 +77,85 @@ function Stars({ rating }: { rating: number }) {
 export function ReviewsSlider({ reviews }: Props) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
-  if (reviews.length === 0) {
-    return (
-      <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-500">
-        No reviews yet. Add Google-style reviews from the admin panel.
-      </p>
-    );
-  }
-
   const scroll = (dir: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    const amount = Math.min(el.clientWidth * 0.9, 360);
+    const amount = Math.min(el.clientWidth * 0.85, 340);
     el.scrollBy({ left: dir * amount, behavior: "smooth" });
   };
 
   return (
-    <div className="relative">
-      <div
-        ref={scrollerRef}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {reviews.map((r) => {
-          const color = r.avatar_color || colorForName(r.author_name || "?");
-          return (
-            <article
-              key={r.id}
-              className="flex w-[280px] shrink-0 snap-start flex-col gap-3 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:w-[320px]"
+    <div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 id="wny-reviews-title" className="text-base font-bold text-neutral-900">
+          Featured reviews
+        </h3>
+        {reviews.length > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => scroll(-1)}
+              aria-label="Previous reviews"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-neutral-200/80 bg-white text-neutral-600 shadow-sm transition hover:bg-neutral-50"
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white"
-                  style={{ backgroundColor: color }}
-                  aria-hidden
-                >
-                  {getInitial(r)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-neutral-900">
-                    {r.author_name || "Anonymous"}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-neutral-500">
-                    <GoogleG />
-                    <span>{r.review_date || "Posted on Google"}</span>
-                  </div>
-                </div>
-              </div>
-              <Stars rating={r.rating} />
-              <p className="line-clamp-5 text-sm leading-relaxed text-neutral-700">
-                {r.review_text}
-              </p>
-            </article>
-          );
-        })}
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scroll(1)}
+              aria-label="Next reviews"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-neutral-200/80 bg-white text-neutral-600 shadow-sm transition hover:bg-neutral-50"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
 
-      {reviews.length > 1 && (
-        <div className="mt-3 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => scroll(-1)}
-            aria-label="Previous reviews"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-100"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll(1)}
-            aria-label="Next reviews"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-100"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+      {reviews.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white/80 p-6 text-sm text-neutral-500 shadow-sm">
+          <p className="font-medium text-neutral-600">No reviews yet</p>
+          <p className="mt-1 text-xs leading-relaxed text-neutral-500">
+            Add Google-style reviews in the admin under <span className="font-semibold">Google Reviews</span> — they will appear here in a carousel, like on contractor sites.
+          </p>
+        </div>
+      ) : (
+        <div
+          ref={scrollerRef}
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {reviews.map((r) => {
+            const color = r.avatar_color || colorForName(r.author_name || "?");
+            return (
+              <article
+                key={r.id}
+                className="flex w-[min(100%,300px)] shrink-0 snap-start flex-col gap-2.5 rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm"
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-inner"
+                    style={{ backgroundColor: color }}
+                    aria-hidden
+                  >
+                    {getInitial(r)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-neutral-900">
+                      {r.author_name || "Anonymous"}
+                    </p>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-500">
+                      <GoogleG />
+                      <span>{r.review_date || "Posted on Google"}</span>
+                    </div>
+                  </div>
+                </div>
+                <Stars rating={r.rating} />
+                <p className="line-clamp-4 text-[0.8125rem] leading-relaxed text-neutral-700">
+                  {r.review_text}
+                </p>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>
