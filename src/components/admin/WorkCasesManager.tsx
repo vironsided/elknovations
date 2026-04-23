@@ -16,6 +16,8 @@ type WorkCase = {
   total_price_usd: number;
   before_image_url: string;
   after_image_url: string;
+  latitude: number | null;
+  longitude: number | null;
   sort_order: number;
 };
 
@@ -30,8 +32,17 @@ const empty: Omit<WorkCase, "id"> = {
   total_price_usd: 0,
   before_image_url: "",
   after_image_url: "",
+  latitude: null,
+  longitude: null,
   sort_order: 0,
 };
+
+function parseCoord(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const n = Number(trimmed);
+  return Number.isFinite(n) ? n : null;
+}
 
 export function WorkCasesManager() {
   const [items, setItems] = useState<WorkCase[]>([]);
@@ -196,6 +207,34 @@ export function WorkCasesManager() {
                 onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) || 0 })}
                 className="w-32 rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
               />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-neutral-600">Latitude</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="40.712776"
+                value={editing.latitude ?? ""}
+                onChange={(e) => setEditing({ ...editing, latitude: parseCoord(e.target.value) })}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-neutral-600">Longitude</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="-74.005974"
+                value={editing.longitude ?? ""}
+                onChange={(e) => setEditing({ ...editing, longitude: parseCoord(e.target.value) })}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <p className="rounded-lg bg-neutral-50 px-3 py-2 text-xs text-neutral-500">
+                Tip: open <a className="underline" href="https://www.google.com/maps" target="_blank" rel="noreferrer">Google Maps</a>,
+                right-click the exact spot → click the decimal coordinates (e.g. <code>40.712776, -74.005974</code>) to copy, then paste the first number into Latitude and the second into Longitude.
+              </p>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-neutral-600">Before image</label>
