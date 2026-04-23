@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import L, { type LatLngBoundsExpression, type LatLngExpression } from "leaflet";
+import L, { type LatLngExpression, type LatLngTuple } from "leaflet";
 import {
   MapContainer,
   Marker,
@@ -23,7 +23,7 @@ const defaultIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-function FitBounds({ positions }: { positions: LatLngExpression[] }) {
+function FitBounds({ positions }: { positions: LatLngTuple[] }) {
   const map = useMap();
   useEffect(() => {
     if (positions.length === 0) return;
@@ -31,7 +31,7 @@ function FitBounds({ positions }: { positions: LatLngExpression[] }) {
       map.setView(positions[0], 12, { animate: false });
       return;
     }
-    const bounds = L.latLngBounds(positions as LatLngBoundsExpression);
+    const bounds = L.latLngBounds(positions);
     map.fitBounds(bounds, { padding: [32, 32], maxZoom: 13 });
   }, [map, positions]);
   return null;
@@ -44,7 +44,7 @@ export function WorkMap({ cases }: Props) {
         .filter((c) => c.latitude != null && c.longitude != null)
         .map((c) => ({
           id: c.id,
-          position: [c.latitude as number, c.longitude as number] as LatLngExpression,
+          position: [c.latitude as number, c.longitude as number] as LatLngTuple,
           case: c,
         })),
     [cases],
@@ -59,7 +59,7 @@ export function WorkMap({ cases }: Props) {
   }
 
   const center: LatLngExpression = points[0].position;
-  const positions = points.map((p) => p.position);
+  const positions: LatLngTuple[] = points.map((p) => p.position);
 
   return (
     <MapContainer

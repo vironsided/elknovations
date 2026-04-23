@@ -45,7 +45,7 @@ Without Supabase env vars the main site works fine using hardcoded fallback data
 
 1. In Supabase dashboard → **SQL Editor** → **New query**.
 2. Paste the contents of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
-3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, `social_links`, `work_categories`, `work_cases`, plus RLS policies and a public `images` storage bucket.
+3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, `social_links`, `work_categories`, `work_cases` (with optional `latitude`/`longitude`), `google_reviews`, plus RLS policies and a public `images` storage bucket.
 
 ### 3. Create the admin user
 
@@ -66,6 +66,7 @@ Log in with the email/password from step 3. The dashboard lets you manage:
 - **Services** — manage service offerings with icon picker
 - **FAQs** — add/edit/delete questions and answers
 - **Testimonials** — manage client reviews
+- **Google Reviews** — manage Google-style reviews shown in the "See work near you" drawer
 - **Social Links** — choose social platforms and links for "Follow us"
 - **Site Settings** — edit brand name, tagline, hero section, about text, contact info, stats
 
@@ -81,6 +82,58 @@ Log in with the email/password from step 3. The dashboard lets you manage:
 Recommended setup order in admin panel:
 1. Create categories in **Work Categories**.
 2. Add portfolio items in **Work Cases** and assign category.
+
+### 6. "See work near you" drawer
+
+A floating "See work near you" tab on the left of the homepage opens a fullscreen magazine-style drawer with three blocks:
+
+- **Featured reviews** — horizontal slider of Google-style review cards (stars, text, author, date, colored avatar initial).
+- **Featured projects** — horizontal slider of `work_cases` (newest first by `completed_at`).
+- **Map** — interactive [Leaflet](https://leafletjs.com) map with [OpenStreetMap](https://www.openstreetmap.org) tiles. No API keys, no billing.
+
+#### Re-run the SQL (only the new parts)
+
+If you set up Supabase before this feature shipped, run this snippet once in **SQL Editor** — it is idempotent:
+
+```sql
+alter table work_cases add column if not exists latitude  numeric(9, 6);
+alter table work_cases add column if not exists longitude numeric(9, 6);
+
+create table if not exists google_reviews (
+  id             uuid primary key default gen_random_uuid(),
+  author_name    text not null,
+  author_initial text not null default '',
+  rating         int  not null default 5,
+  review_text    text not null default '',
+  review_date    text not null default '',
+  avatar_color   text not null default '',
+  sort_order     int  not null default 0,
+  created_at     timestamptz not null default now()
+);
+
+alter table google_reviews enable row level security;
+create policy "Public read google_reviews" on google_reviews for select using (true);
+create policy "Admin write google_reviews" on google_reviews for all using (auth.role() = 'authenticated');
+```
+
+Or just re-run the full [`supabase/schema.sql`](supabase/schema.sql) — every statement is `if not exists` / `add column if not exists`.
+
+#### Add Google-style reviews (manual entry)
+
+1. Open `/admin/google-reviews` → **Add review**.
+2. Fill in author name, rating, review text, and a human-friendly date ("2 months ago" or "March 2026").
+3. Optionally set a custom avatar color (`#1a73e8` etc.) — otherwise it auto-colors from the name.
+4. Save — the review appears immediately in the drawer.
+
+You can later swap to the Google Places API without touching the UI: replace `useGoogleReviews()` in `src/hooks/useSiteData.ts` with a call that fetches reviews from Google and maps them to the same shape.
+
+#### Add coordinates for map pins (3 steps)
+
+1. Open [Google Maps](https://www.google.com/maps), search for the project address.
+2. Right-click the exact spot → click the decimal coordinates at the top of the menu (e.g. `40.712776, -74.005974`) to copy them.
+3. In `/admin/work-cases`, open the case, paste the first number into **Latitude** and the second into **Longitude**, then save. The pin appears on the drawer map immediately.
+
+Work cases without coordinates are still shown in the slider and on `/work`; they just don't appear as map pins.
 
 ---
 
@@ -118,4 +171,5 @@ Add all three `VITE_*` variables in Vercel → Settings → Environment Variable
 - **Lucide React** for icons
 - **Supabase** (PostgreSQL + Auth + Storage) — free tier
 - **Web3Forms** for contact form
+- **Leaflet + OpenStreetMap** for the "See work near you" map (free, no API keys)
 - **React Router** for `/` (main site), `/work` (full portfolio), and `/admin/*` (admin panel)
