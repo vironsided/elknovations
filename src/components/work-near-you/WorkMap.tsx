@@ -153,7 +153,7 @@ export function WorkMap({ cases, onMarkerClickId }: Props) {
                   </div>
                   <Link
                     to="/work"
-                    className="inline-flex w-fit rounded-md bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-500"
+                    className="inline-flex w-fit rounded-md bg-blue-600 px-3 py-1.5 text-xs font-bold !text-white no-underline hover:bg-blue-500 hover:!text-white focus:!text-white visited:!text-white"
                     onClick={() => onMarkerClickId?.(id)}
                   >
                     View details

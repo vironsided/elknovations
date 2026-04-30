@@ -137,6 +137,28 @@ Work cases without coordinates are still shown in the slider and on `/work`; the
 
 ---
 
+## Contact form with attachments (free via Resend)
+
+If Web3Forms asks for a Pro plan when files are attached, switch to Supabase Edge Function + Resend.
+
+1. Create a function:
+   - `supabase/functions/send-contact/index.ts` is included in this repo.
+2. Set function secrets:
+   - `RESEND_API_KEY=...`
+   - `CONTACT_TO_EMAIL=you@example.com`
+   - `CONTACT_FROM_EMAIL=onboarding@resend.dev` (or your verified domain sender)
+3. Deploy the function:
+   - `supabase functions deploy send-contact --no-verify-jwt`
+4. Add frontend env:
+   - `VITE_CONTACT_ENDPOINT=https://<project-ref>.supabase.co/functions/v1/send-contact`
+5. Redeploy frontend.
+
+Notes:
+- Never put `RESEND_API_KEY` in frontend code or `VITE_*` variables.
+- The form still supports Web3Forms fallback when `VITE_CONTACT_ENDPOINT` is empty.
+
+---
+
 ## Contact form (Web3Forms)
 
 The contact form POSTs to [Web3Forms](https://web3forms.com) (free tier, text only).

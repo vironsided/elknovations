@@ -4,6 +4,8 @@ import { footerLinks } from "../data/site";
 import { useBrand, useContact, useSocialLinks } from "../hooks/useSiteData";
 
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+const CONTACT_ENDPOINT = String(import.meta.env.VITE_CONTACT_ENDPOINT ?? "").trim();
+const CONTACT_USE_RESEND = Boolean(CONTACT_ENDPOINT);
 const MAX_ATTACHMENTS = 3;
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 const ATTACHMENTS_HINT = "Up to 3 files, max 10MB each (images, PDF, DOC, DOCX).";
@@ -108,13 +110,6 @@ export function Contact() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
-
-    const key = getAccessKey();
-    if (!key) {
-      setSubmitError(missingKeyHelp());
-      return;
-    }
-
     setSubmitting(true);
     const form = e.currentTarget;
     const attachmentsInput = form.elements.namedItem("attachments") as HTMLInputElement | null;
@@ -124,11 +119,41 @@ export function Contact() {
       setSubmitting(false);
       return;
     }
-    const fd = new FormData(form);
-    fd.append("access_key", key);
-    fd.append("subject", "Elk Novations — Website contact form");
 
     try {
+      if (CONTACT_USE_RESEND) {
+        const fd = new FormData(form);
+        const res = await fetch(CONTACT_ENDPOINT, {
+          method: "POST",
+          body: fd,
+        });
+        const data = (await res.json().catch(() => ({}))) as { success?: boolean; message?: string };
+
+        if (res.ok && data.success) {
+          setSent(true);
+          form.reset();
+        } else {
+          setSubmitError(data.message || "Could not send message right now. Please try again.");
+        }
+        return;
+      }
+
+      const key = getAccessKey();
+      if (!key) {
+        setSubmitError(missingKeyHelp());
+        return;
+      }
+
+      if ((attachmentsInput?.files?.length ?? 0) > 0) {
+        setSubmitError("Attachments via Web3Forms require Pro. Use Resend endpoint mode to send files for free.");
+        return;
+      }
+
+      const fd = new FormData(form);
+      fd.append("access_key", key);
+      fd.append("subject", "Elk Novations — Website contact form");
+      fd.delete("attachments");
+
       const res = await fetch(WEB3FORMS_URL, {
         method: "POST",
         body: fd,
@@ -319,16 +344,22 @@ export function Contact() {
                   {submitting ? "Sending…" : "Send message"}
                 </button>
                 <p className="text-center text-xs text-neutral-500">
-                  Submissions go to {contact.email} via{" "}
-                  <a
-                    href="https://web3forms.com"
-                    className="underline underline-offset-2 hover:text-neutral-800"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Web3Forms
-                  </a>
-                  .
+                  {CONTACT_USE_RESEND ? (
+                    <>Submissions go to {contact.email} via your secure Resend endpoint.</>
+                  ) : (
+                    <>
+                      Submissions go to {contact.email} via{" "}
+                      <a
+                        href="https://web3forms.com"
+                        className="underline underline-offset-2 hover:text-neutral-800"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Web3Forms
+                      </a>
+                      .
+                    </>
+                  )}
                 </p>
               </form>
             )}
