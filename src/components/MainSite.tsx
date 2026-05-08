@@ -5,6 +5,7 @@ import { About } from "./About";
 import { Stats } from "./Stats";
 import { Services } from "./Services";
 import { WorkShowcase } from "./WorkShowcase";
+import { VideoTransformations } from "./VideoTransformations";
 import { Testimonials } from "./Testimonials";
 import { FAQ } from "./FAQ";
 import { Contact } from "./Contact";
@@ -26,6 +27,7 @@ export function MainSite() {
         <Stats />
         <Services />
         <WorkShowcase />
+        <VideoTransformations />
         <Testimonials />
         <FAQ />
         <Contact />

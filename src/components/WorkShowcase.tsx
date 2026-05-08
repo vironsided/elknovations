@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
 import { useProjects, type Project } from "../hooks/useSiteData";
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
@@ -12,19 +13,19 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ delay: index * 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className={`overflow-hidden rounded-2xl border shadow-lg sm:rounded-3xl ${
+      className={`group overflow-hidden rounded-2xl border shadow-lg transition-shadow duration-500 hover:shadow-2xl sm:rounded-3xl ${
         isDark
-          ? "border-neutral-800 bg-neutral-950 text-white"
-          : "border-neutral-200/80 bg-neutral-100 text-neutral-900"
+          ? "border-neutral-800 bg-neutral-950 text-white hover:border-neutral-700"
+          : "border-neutral-200/80 bg-neutral-100 text-neutral-900 hover:border-neutral-300"
       }`}
     >
       <div className="grid gap-0 md:grid-cols-2">
-        <div className="relative aspect-[4/3] bg-neutral-200/80 md:aspect-auto md:min-h-[340px]">
+        <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200/80 md:aspect-auto md:min-h-[340px]">
           {img ? (
             <img
               src={img}
               alt=""
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
               loading={index === 0 ? "eager" : "lazy"}
               decoding="async"
             />
@@ -33,7 +34,10 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               No image
             </div>
           )}
+          {/* Subtle gold accent on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
         </div>
+
         <div className="flex flex-col justify-center p-8 md:p-12">
           <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{project.title}</h3>
           <p
@@ -43,6 +47,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           >
             {project.description}
           </p>
+
           {(project.category || project.duration) && (
             <div className="mt-6 flex flex-wrap gap-2">
               {project.category && (
@@ -57,7 +62,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               {project.duration && (
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    isDark ? "bg-white/10 text-white" : "bg-black text-white"
+                    isDark ? "bg-amber-400/15 text-amber-300" : "bg-amber-50 text-amber-700"
                   }`}
                 >
                   {project.duration}
@@ -65,11 +70,12 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               )}
             </div>
           )}
+
           {project.quote && (
             <div
               className={`mt-8 border-t pt-6 ${isDark ? "border-white/10" : "border-neutral-200"}`}
             >
-              <p className="text-3xl leading-none opacity-40">&ldquo;</p>
+              <p className="text-3xl leading-none opacity-30">&ldquo;</p>
               <p
                 className={`text-sm leading-relaxed ${
                   isDark ? "text-neutral-300" : "text-neutral-600"
@@ -114,9 +120,10 @@ export function WorkShowcase() {
           </p>
           <Link
             to="/work"
-            className="mt-6 inline-flex rounded-xl bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800"
           >
             View all projects
+            <ArrowUpRight size={15} strokeWidth={2} />
           </Link>
         </motion.div>
 
