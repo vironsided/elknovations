@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CalendarDays, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { WorkCase } from "../../hooks/useSiteData";
@@ -29,8 +29,12 @@ function ProjectImageStrip({
   after: string;
   title: string;
 }) {
-  const slides = [after, before].filter((u) => u && u.trim().length > 0);
+  const slides = [
+    { src: after, label: "After" },
+    { src: before, label: "Before" },
+  ].filter((slide) => slide.src && slide.src.trim().length > 0);
   const [index, setIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   if (slides.length === 0) {
     return (
@@ -41,31 +45,69 @@ function ProjectImageStrip({
   }
 
   const i = Math.min(index, slides.length - 1);
+  const current = slides[i];
+
+  const goNext = () => {
+    setIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  const goPrev = () => {
+    setIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
 
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
+    <div
+      className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100"
+      onTouchStart={(e) => {
+        touchStartX.current = e.changedTouches[0]?.clientX ?? null;
+      }}
+      onTouchEnd={(e) => {
+        if (slides.length < 2 || touchStartX.current == null) return;
+        const endX = e.changedTouches[0]?.clientX;
+        if (typeof endX !== "number") return;
+        const deltaX = endX - touchStartX.current;
+        const threshold = 35;
+        if (Math.abs(deltaX) < threshold) return;
+        if (deltaX < 0) goNext();
+        else goPrev();
+      }}
+    >
       <img
-        src={slides[i]}
+        src={current.src}
         alt={title}
         loading="lazy"
         className="h-full w-full object-cover transition duration-300"
       />
       {slides.length > 1 && (
-        <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1.5">
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setIndex(idx);
-              }}
-              aria-label={`Photo ${idx + 1} of ${slides.length}`}
-              className={`h-2 w-2 rounded-full transition ${
-                idx === i ? "bg-white shadow" : "bg-white/45 hover:bg-white/70"
-              }`}
-            />
-          ))}
+        <>
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2" />
+        </>
+      )}
+      <span className="absolute right-2.5 top-2.5 rounded-md bg-black/55 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+        {current.label}
+      </span>
+      {slides.length > 1 && (
+        <div className="absolute bottom-2.5 left-0 right-0 flex flex-col items-center gap-1">
+          <div className="flex justify-center gap-1.5">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIndex(idx);
+                }}
+                aria-label={`Photo ${idx + 1} of ${slides.length}`}
+                className={`h-2 w-2 rounded-full transition ${
+                  idx === i ? "bg-white shadow" : "bg-white/45 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+          <span className="rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white/95 md:hidden">
+            Swipe left/right
+          </span>
         </div>
       )}
       <span className="sr-only">{title}</span>
