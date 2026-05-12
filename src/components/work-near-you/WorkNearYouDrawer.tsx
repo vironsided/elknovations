@@ -178,8 +178,8 @@ export function WorkNearYouDrawer({ open, onClose }: Props) {
               </div>
             </header>
 
-            <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-              <div className="min-h-0 w-full flex-[0_0_auto] overflow-y-auto border-neutral-200/80 bg-[#f7f7f8] px-4 py-5 md:px-8 lg:max-w-[46%] lg:flex-[0_0_44%] lg:border-r">
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+              <div className="w-full flex-[0_0_auto] border-neutral-200/80 bg-[#f7f7f8] px-4 py-5 md:px-8 lg:min-h-0 lg:max-w-[46%] lg:flex-[0_0_44%] lg:overflow-y-auto lg:border-r">
                 <div className="mx-auto max-w-2xl space-y-10 pb-8 lg:max-w-none">
                   <section aria-labelledby="wny-reviews-title">
                     <ReviewsSlider reviews={reviews} />
