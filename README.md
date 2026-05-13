@@ -45,7 +45,7 @@ Without Supabase env vars the main site works fine using hardcoded fallback data
 
 1. In Supabase dashboard → **SQL Editor** → **New query**.
 2. Paste the contents of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
-3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, `social_links`, `work_categories`, `work_cases` (with optional `latitude`/`longitude`), `google_reviews`, `transformations`, plus RLS policies and a public `images` storage bucket.
+3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, `social_links`, `work_categories`, `work_cases` (with optional `latitude`/`longitude`), `google_reviews`, `transformations`, plus RLS policies and public `images` + `videos` storage buckets.
 
 ### 3. Create the admin user
 

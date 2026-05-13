@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Save, X, GripVertical } from "lucide-react";
 import { supabase, supabaseConfigured } from "../../lib/supabase";
+import { VideoUpload } from "./VideoUpload";
 
 type Transformation = {
   id: string;
@@ -116,7 +117,18 @@ export function TransformationsManager() {
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-neutral-900">{isNew ? "New video" : "Edit video"}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">{field("src", "Video URL")}</div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-medium text-neutral-600">Video file</label>
+              <VideoUpload
+                currentUrl={editing.src}
+                onUploaded={(url) => setEditing({ ...editing, src: url })}
+                bucket="videos"
+                folder="transformations"
+              />
+              <p className="mt-2 truncate text-xs text-neutral-500">
+                {editing.src ? `Uploaded URL: ${editing.src}` : "Upload a video file to continue."}
+              </p>
+            </div>
             {field("title", "Title")}
             {field("tag", "Tag")}
             <div className="sm:col-span-2">{field("description", "Description", true)}</div>

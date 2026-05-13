@@ -162,3 +162,15 @@ create policy "Public read images" on storage.objects for select using (bucket_i
 create policy "Admin upload images" on storage.objects for insert with check (bucket_id = 'images' and auth.role() = 'authenticated');
 create policy "Admin update images" on storage.objects for update using (bucket_id = 'images' and auth.role() = 'authenticated');
 create policy "Admin delete images" on storage.objects for delete using (bucket_id = 'images' and auth.role() = 'authenticated');
+
+-- Storage bucket for videos ---------------------------------------------------
+-- Run this AFTER creating a bucket named "videos" in Storage (Dashboard → Storage → New bucket → name: videos, public: ON)
+-- Or use the API: supabase.storage.createBucket('videos', { public: true })
+
+insert into storage.buckets (id, name, public) values ('videos', 'videos', true)
+on conflict (id) do nothing;
+
+create policy "Public read videos" on storage.objects for select using (bucket_id = 'videos');
+create policy "Admin upload videos" on storage.objects for insert with check (bucket_id = 'videos' and auth.role() = 'authenticated');
+create policy "Admin update videos" on storage.objects for update using (bucket_id = 'videos' and auth.role() = 'authenticated');
+create policy "Admin delete videos" on storage.objects for delete using (bucket_id = 'videos' and auth.role() = 'authenticated');
