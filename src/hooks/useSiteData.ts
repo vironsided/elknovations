@@ -4,6 +4,7 @@ import { parseImageField } from "../utils/imageFields";
 import {
   services as fallbackServices,
   projects as fallbackProjects,
+  transformations as fallbackTransformations,
   faqs as fallbackFaqs,
   testimonials as fallbackTestimonials,
   brand as fallbackBrand,
@@ -59,6 +60,15 @@ export type GoogleReview = {
   review_text: string;
   review_date: string;
   avatar_color: string;
+  sort_order: number;
+};
+
+export type Transformation = {
+  id: string;
+  src: string;
+  title: string;
+  description: string;
+  tag: string;
   sort_order: number;
 };
 
@@ -214,4 +224,16 @@ export function useSettings(key: string) {
 
 export function useGoogleReviews() {
   return useFetch<GoogleReview>("google_reviews", []);
+}
+
+export function useTransformations() {
+  const mapped = fallbackTransformations.map((item, i) => ({
+    id: item.id,
+    src: item.src,
+    title: item.title,
+    description: item.description,
+    tag: item.tag,
+    sort_order: i,
+  }));
+  return useFetch<Transformation>("transformations", mapped);
 }

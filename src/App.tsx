@@ -13,6 +13,7 @@ const TestimonialsManager = lazy(() => import("./components/admin/TestimonialsMa
 const GoogleReviewsManager = lazy(() => import("./components/admin/GoogleReviewsManager").then((m) => ({ default: m.GoogleReviewsManager })));
 const WorkCategoriesManager = lazy(() => import("./components/admin/WorkCategoriesManager").then((m) => ({ default: m.WorkCategoriesManager })));
 const WorkCasesManager = lazy(() => import("./components/admin/WorkCasesManager").then((m) => ({ default: m.WorkCasesManager })));
+const TransformationsManager = lazy(() => import("./components/admin/TransformationsManager").then((m) => ({ default: m.TransformationsManager })));
 const SocialLinksManager = lazy(() => import("./components/admin/SocialLinksManager").then((m) => ({ default: m.SocialLinksManager })));
 const SiteSettings = lazy(() => import("./components/admin/SiteSettings").then((m) => ({ default: m.SiteSettings })));
 const ProtectedRoute = lazy(() => import("./components/ui/ProtectedRoute").then((m) => ({ default: m.ProtectedRoute })));
@@ -50,6 +51,7 @@ function App() {
             <Route path="google-reviews" element={<GoogleReviewsManager />} />
             <Route path="work-categories" element={<WorkCategoriesManager />} />
             <Route path="work-cases" element={<WorkCasesManager />} />
+            <Route path="transformations" element={<TransformationsManager />} />
             <Route path="social-links" element={<SocialLinksManager />} />
             <Route path="settings" element={<SiteSettings />} />
           </Route>

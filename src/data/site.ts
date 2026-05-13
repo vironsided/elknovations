@@ -169,6 +169,45 @@ export const projects = [
   },
 ];
 
+export type TransformationItem = {
+  id: string;
+  src: string;
+  title: string;
+  description: string;
+  tag: string;
+};
+
+export const transformations: TransformationItem[] = [
+  {
+    id: "transformation-1",
+    src: "/videos/transformation-1.mp4",
+    title: "The Reveal",
+    description: "Watch a complete renovation unfold — raw space to finished masterpiece",
+    tag: "Before → After",
+  },
+  {
+    id: "transformation-2",
+    src: "/videos/transformation-2.mp4",
+    title: "The Touch",
+    description: "A single expert touch — see how craftsmanship changes everything",
+    tag: "Craftsmanship",
+  },
+  {
+    id: "transformation-3",
+    src: "/videos/transformation-3.mp4",
+    title: "The Transition",
+    description: "Side-by-side transformation — precision work that speaks for itself",
+    tag: "Before → After",
+  },
+  {
+    id: "transformation-4",
+    src: "/videos/transformation-4.mp4",
+    title: "The Result",
+    description: "The moment before and after collide — stunning finish revealed",
+    tag: "Before → After",
+  },
+];
+
 const testimonialFirstNames = [
   "Emily", "James", "Sophie", "Daniel", "Charlotte", "Oliver", "Hannah", "Michael",
   "Rachel", "Ben", "Laura", "Thomas", "Anna", "Chris", "Natalie", "Ryan", "Kate",

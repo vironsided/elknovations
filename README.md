@@ -45,7 +45,7 @@ Without Supabase env vars the main site works fine using hardcoded fallback data
 
 1. In Supabase dashboard → **SQL Editor** → **New query**.
 2. Paste the contents of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
-3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, `social_links`, `work_categories`, `work_cases` (with optional `latitude`/`longitude`), `google_reviews`, plus RLS policies and a public `images` storage bucket.
+3. This creates tables: `site_settings`, `services`, `projects`, `faqs`, `testimonials`, `social_links`, `work_categories`, `work_cases` (with optional `latitude`/`longitude`), `google_reviews`, `transformations`, plus RLS policies and a public `images` storage bucket.
 
 ### 3. Create the admin user
 
@@ -68,6 +68,7 @@ Log in with the email/password from step 3. The dashboard lets you manage:
 - **Testimonials** — manage client reviews
 - **Google Reviews** — manage Google-style reviews shown in the "See work near you" drawer
 - **Social Links** — choose social platforms and links for "Follow us"
+- **Transformations** — manage videos shown in the "Witness the Difference" section
 - **Site Settings** — edit brand name, tagline, hero section, about text, contact info, stats
 
 ### 5. Full work catalog page (`/work`)

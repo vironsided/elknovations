@@ -1,39 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, VolumeX, Volume2 } from "lucide-react";
-
-const VIDEOS = [
-  {
-    id: 1,
-    src: "/videos/transformation-1.mp4",
-    title: "The Reveal",
-    desc: "Watch a complete renovation unfold — raw space to finished masterpiece",
-    tag: "Before → After",
-  },
-  {
-    id: 2,
-    src: "/videos/transformation-2.mp4",
-    title: "The Touch",
-    desc: "A single expert touch — see how craftsmanship changes everything",
-    tag: "Craftsmanship",
-  },
-  {
-    id: 3,
-    src: "/videos/transformation-3.mp4",
-    title: "The Transition",
-    desc: "Side-by-side transformation — precision work that speaks for itself",
-    tag: "Before → After",
-  },
-  {
-    id: 4,
-    src: "/videos/transformation-4.mp4",
-    title: "The Result",
-    desc: "The moment before and after collide — stunning finish revealed",
-    tag: "Before → After",
-  },
-];
+import { useTransformations } from "../hooks/useSiteData";
 
 export function VideoTransformations() {
+  const { data: videos } = useTransformations();
   const [activeIdx, setActiveIdx] = useState(0);
   const [muted, setMuted] = useState(true);
   const mainRef = useRef<HTMLVideoElement>(null);
@@ -53,6 +24,12 @@ export function VideoTransformations() {
   const handleThumbClick = (i: number) => {
     if (i !== activeIdx) setActiveIdx(i);
   };
+
+  useEffect(() => {
+    if (activeIdx >= videos.length) setActiveIdx(0);
+  }, [activeIdx, videos.length]);
+
+  if (videos.length === 0) return null;
 
   return (
     <section
@@ -115,7 +92,7 @@ export function VideoTransformations() {
               >
                 <video
                   ref={mainRef}
-                  src={VIDEOS[activeIdx].src}
+                  src={videos[activeIdx]?.src ?? ""}
                   className="h-full w-full object-cover"
                   muted={muted}
                   autoPlay
@@ -133,7 +110,7 @@ export function VideoTransformations() {
                     transition={{ delay: 0.15, duration: 0.4 }}
                     className="mb-3 inline-block rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-400"
                   >
-                    {VIDEOS[activeIdx].tag}
+                    {videos[activeIdx]?.tag ?? ""}
                   </motion.span>
                   <motion.h3
                     initial={{ opacity: 0, y: 8 }}
@@ -141,7 +118,7 @@ export function VideoTransformations() {
                     transition={{ delay: 0.22, duration: 0.4 }}
                     className="text-2xl font-semibold text-white md:text-3xl"
                   >
-                    {VIDEOS[activeIdx].title}
+                    {videos[activeIdx]?.title ?? ""}
                   </motion.h3>
                   <motion.p
                     initial={{ opacity: 0, y: 8 }}
@@ -149,7 +126,7 @@ export function VideoTransformations() {
                     transition={{ delay: 0.29, duration: 0.4 }}
                     className="mt-1.5 max-w-sm text-sm leading-relaxed text-white/65"
                   >
-                    {VIDEOS[activeIdx].desc}
+                    {videos[activeIdx]?.description ?? ""}
                   </motion.p>
                 </div>
 
@@ -165,7 +142,7 @@ export function VideoTransformations() {
 
                 {/* Video counter */}
                 <span className="absolute left-5 top-5 rounded-full border border-white/10 bg-black/40 px-3 py-1 text-xs font-medium text-white/60 backdrop-blur-sm">
-                  {activeIdx + 1} / {VIDEOS.length}
+                  {activeIdx + 1} / {videos.length}
                 </span>
               </motion.div>
             </AnimatePresence>
@@ -173,7 +150,7 @@ export function VideoTransformations() {
 
           {/* ── Thumbnail rail ── */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 lg:gap-4">
-            {VIDEOS.map((video, i) => {
+            {videos.map((video, i) => {
               const isActive = activeIdx === i;
               return (
                 <motion.button
