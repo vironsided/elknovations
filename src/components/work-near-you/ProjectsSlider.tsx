@@ -25,13 +25,13 @@ function ProjectImageStrip({
   after,
   title,
 }: {
-  before: string;
-  after: string;
+  before: string[];
+  after: string[];
   title: string;
 }) {
   const slides = [
-    { src: after, label: "After" },
-    { src: before, label: "Before" },
+    ...after.map((src) => ({ src, label: "After" })),
+    ...before.map((src) => ({ src, label: "Before" })),
   ].filter((slide) => slide.src && slide.src.trim().length > 0);
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
@@ -152,8 +152,8 @@ export function ProjectsSlider({ cases, projectCount }: Props) {
             >
               <div className="relative">
                 <ProjectImageStrip
-                  before={c.before_image_url}
-                  after={c.after_image_url}
+                  before={c.before_images}
+                  after={c.after_images}
                   title={c.title}
                 />
                 {c.work_categories?.name && (

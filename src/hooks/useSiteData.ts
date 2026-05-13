@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase, supabaseConfigured } from "../lib/supabase";
+import { parseImageField } from "../utils/imageFields";
 import {
   services as fallbackServices,
   projects as fallbackProjects,
@@ -42,6 +43,8 @@ export type WorkCase = {
   total_price_usd: number;
   before_image_url: string;
   after_image_url: string;
+  before_images: string[];
+  after_images: string[];
   latitude: number | null;
   longitude: number | null;
   sort_order: number;
@@ -183,7 +186,20 @@ export function useWorkCases(selectedCategory = "all"): { data: WorkCase[]; load
       }
 
       const { data: rows } = await query;
-      if (!cancelled && rows) setData(rows as WorkCase[]);
+      if (!cancelled && rows) {
+        const normalized = rows.map((row) => {
+          const beforeImages = parseImageField(row.before_image_url);
+          const afterImages = parseImageField(row.after_image_url);
+          return {
+            ...row,
+            before_image_url: beforeImages[0] ?? "",
+            after_image_url: afterImages[0] ?? "",
+            before_images: beforeImages,
+            after_images: afterImages,
+          };
+        });
+        setData(normalized as WorkCase[]);
+      }
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };

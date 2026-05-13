@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Save, X, GripVertical } from "lucide-react";
 import { supabase, supabaseConfigured } from "../../lib/supabase";
 import { ImageUpload } from "./ImageUpload";
+import { parseImageField, stringifyImageField } from "../../utils/imageFields";
 
 type WorkCategory = { id: string; name: string };
 type WorkCase = {
@@ -14,8 +15,8 @@ type WorkCase = {
   scope_details: string;
   materials: string;
   total_price_usd: number;
-  before_image_url: string;
-  after_image_url: string;
+  before_images: string[];
+  after_images: string[];
   latitude: number | null;
   longitude: number | null;
   sort_order: number;
@@ -30,8 +31,8 @@ const empty: Omit<WorkCase, "id"> = {
   scope_details: "",
   materials: "",
   total_price_usd: 0,
-  before_image_url: "",
-  after_image_url: "",
+  before_images: [],
+  after_images: [],
   latitude: null,
   longitude: null,
   sort_order: 0,
@@ -57,7 +58,15 @@ export function WorkCasesManager() {
       supabase.from("work_cases").select("*").order("sort_order"),
       supabase.from("work_categories").select("id, name").order("sort_order"),
     ]);
-    if (cases) setItems(cases);
+    if (cases) {
+      setItems(
+        cases.map((item) => ({
+          ...item,
+          before_images: parseImageField(item.before_image_url),
+          after_images: parseImageField(item.after_image_url),
+        })),
+      );
+    }
     if (cats) setCategories(cats);
   }
 
@@ -79,12 +88,26 @@ export function WorkCasesManager() {
   async function save() {
     if (!editing || !editing.title.trim()) return;
     setSaving(true);
+    const payload = {
+      category_id: editing.category_id,
+      title: editing.title,
+      location: editing.location,
+      completed_at: editing.completed_at,
+      summary: editing.summary,
+      scope_details: editing.scope_details,
+      materials: editing.materials,
+      total_price_usd: editing.total_price_usd,
+      before_image_url: stringifyImageField(editing.before_images),
+      after_image_url: stringifyImageField(editing.after_images),
+      latitude: editing.latitude,
+      longitude: editing.longitude,
+      sort_order: editing.sort_order,
+    };
+
     if (isNew) {
-      const { id: _id, ...rest } = editing;
-      await supabase.from("work_cases").insert(rest);
+      await supabase.from("work_cases").insert(payload);
     } else {
-      const { id, ...rest } = editing;
-      await supabase.from("work_cases").update(rest).eq("id", id);
+      await supabase.from("work_cases").update(payload).eq("id", editing.id);
     }
     setSaving(false);
     cancel();
@@ -237,18 +260,20 @@ export function WorkCasesManager() {
               </p>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-600">Before image</label>
+              <label className="mb-1 block text-xs font-medium text-neutral-600">Before images</label>
               <ImageUpload
-                currentUrl={editing.before_image_url}
-                onUploaded={(url) => setEditing({ ...editing, before_image_url: url })}
+                currentUrls={editing.before_images}
+                onUploadedUrls={(urls) => setEditing({ ...editing, before_images: urls })}
+                multiple
                 folder="work-cases/before"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-600">After image</label>
+              <label className="mb-1 block text-xs font-medium text-neutral-600">After images</label>
               <ImageUpload
-                currentUrl={editing.after_image_url}
-                onUploaded={(url) => setEditing({ ...editing, after_image_url: url })}
+                currentUrls={editing.after_images}
+                onUploadedUrls={(urls) => setEditing({ ...editing, after_images: urls })}
+                multiple
                 folder="work-cases/after"
               />
             </div>

@@ -15,6 +15,33 @@ function formatPrice(price: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(price);
 }
 
+function CaseImageGrid({ title, label, images }: { title: string; label: "Before" | "After"; images: string[] }) {
+  if (images.length === 0) {
+    return (
+      <div className="relative flex h-full min-h-56 items-center justify-center bg-neutral-100 text-sm text-neutral-400 sm:min-h-72">
+        No {label.toLowerCase()} image
+        <span className="absolute left-3 top-3 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full border-b border-neutral-200 last:border-b-0 lg:border-b-0 lg:border-r lg:last:border-r-0">
+      <span className="absolute left-3 top-3 z-10 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
+      <div className={`grid h-full ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-0`}>
+        {images.map((src, index) => (
+          <img
+            key={`${src}-${index}`}
+            src={src}
+            alt={`${title} ${label.toLowerCase()} ${index + 1}`}
+            className="h-56 w-full object-cover sm:h-72"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function WorkPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { data: categories } = useWorkCategories();
@@ -81,26 +108,8 @@ export function WorkPage() {
               >
                 <div className="grid gap-0 lg:grid-cols-2">
                   <div className="grid border-b border-neutral-200 lg:border-b-0 lg:border-r lg:grid-cols-2">
-                    <div className="relative">
-                      {item.before_image_url ? (
-                        <img src={item.before_image_url} alt={`${item.title} before`} className="h-56 w-full object-cover sm:h-72" />
-                      ) : (
-                        <div className="flex h-56 items-center justify-center bg-neutral-100 text-sm text-neutral-400 sm:h-72">
-                          No before image
-                        </div>
-                      )}
-                      <span className="absolute left-3 top-3 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">Before</span>
-                    </div>
-                    <div className="relative">
-                      {item.after_image_url ? (
-                        <img src={item.after_image_url} alt={`${item.title} after`} className="h-56 w-full object-cover sm:h-72" />
-                      ) : (
-                        <div className="flex h-56 items-center justify-center bg-neutral-100 text-sm text-neutral-400 sm:h-72">
-                          No after image
-                        </div>
-                      )}
-                      <span className="absolute left-3 top-3 rounded-full bg-black px-2 py-1 text-xs font-semibold text-white">After</span>
-                    </div>
+                    <CaseImageGrid title={item.title} label="Before" images={item.before_images} />
+                    <CaseImageGrid title={item.title} label="After" images={item.after_images} />
                   </div>
 
                   <div className="p-6 md:p-8">

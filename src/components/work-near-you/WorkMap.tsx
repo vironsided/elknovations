@@ -118,7 +118,7 @@ export function WorkMap({ cases, onMarkerClickId }: Props) {
         <MapLocatePortal />
         <FitBounds positions={positions} />
         {indexed.map(({ id, index, position, case: c }) => {
-          const img = c.after_image_url || c.before_image_url;
+          const img = c.after_images[0] || c.before_images[0] || c.after_image_url || c.before_image_url;
           return (
             <Marker
               key={id}
