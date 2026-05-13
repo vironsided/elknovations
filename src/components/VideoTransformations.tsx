@@ -149,7 +149,7 @@ export function VideoTransformations() {
           </motion.div>
 
           {/* ── Thumbnail rail ── */}
-          <div className="grid grid-cols-2 gap-3 lg:max-h-[clamp(360px,52vw,620px)] lg:grid-cols-1 lg:gap-4 lg:overflow-y-auto lg:pr-1">
+          <div className="transformations-rail-scroll grid grid-cols-2 gap-3 lg:max-h-[clamp(360px,52vw,620px)] lg:grid-cols-1 lg:gap-4 lg:overflow-y-auto lg:pr-1">
             {videos.map((video, i) => {
               const isActive = activeIdx === i;
               return (
