@@ -16,28 +16,65 @@ function formatPrice(price: number) {
 }
 
 function CaseImageGrid({ title, label, images }: { title: string; label: "Before" | "After"; images: string[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
   if (images.length === 0) {
     return (
-      <div className="relative flex h-full min-h-56 items-center justify-center bg-neutral-100 text-sm text-neutral-400 sm:min-h-72">
+      <div className="relative flex h-full min-h-56 items-center justify-center bg-neutral-100 text-sm text-neutral-400 sm:min-h-72 lg:min-h-80">
         No {label.toLowerCase()} image
         <span className="absolute left-3 top-3 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
       </div>
     );
   }
 
+  const safeIndex = Math.min(activeIndex, images.length - 1);
+  const activeImage = images[safeIndex];
+
   return (
-    <div className="relative h-full border-b border-neutral-200 last:border-b-0 lg:border-b-0 lg:border-r lg:last:border-r-0">
-      <span className="absolute left-3 top-3 z-10 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
-      <div className={`grid h-full ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-0`}>
-        {images.map((src, index) => (
-          <img
-            key={`${src}-${index}`}
-            src={src}
-            alt={`${title} ${label.toLowerCase()} ${index + 1}`}
-            className="h-56 w-full object-cover sm:h-72"
-          />
-        ))}
+    <div className="relative h-full border-b border-neutral-200 bg-neutral-50 p-3 last:border-b-0 lg:border-b-0 lg:border-r lg:last:border-r-0">
+      <span className="absolute left-5 top-5 z-10 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
+      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+        <img
+          src={activeImage}
+          alt={`${title} ${label.toLowerCase()} ${safeIndex + 1}`}
+          className="h-56 w-full object-cover sm:h-72 lg:h-80"
+        />
       </div>
+      {images.length > 1 ? (
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+          {images.map((src, index) => (
+            <button
+              key={`${src}-${index}`}
+              type="button"
+              onClick={() => setActiveIndex(index)}
+              className={`shrink-0 overflow-hidden rounded-lg border transition ${
+                index === safeIndex
+                  ? "border-neutral-900 ring-1 ring-neutral-900"
+                  : "border-neutral-200 hover:border-neutral-400"
+              }`}
+              aria-label={`Show ${label.toLowerCase()} image ${index + 1}`}
+            >
+              <img
+                src={src}
+                alt={`${title} ${label.toLowerCase()} thumbnail ${index + 1}`}
+                className="h-14 w-20 object-cover sm:h-16 sm:w-24"
+              />
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <div className="mt-2 text-xs font-medium text-neutral-500">
+        {images.length} photo{images.length === 1 ? "" : "s"}
+      </div>
+    </div>
+  );
+}
+
+function CaseImagesSection({ title, beforeImages, afterImages }: { title: string; beforeImages: string[]; afterImages: string[] }) {
+  return (
+    <div className="grid border-b border-neutral-200 lg:border-b-0 lg:border-r lg:grid-cols-2">
+      <CaseImageGrid title={title} label="Before" images={beforeImages} />
+      <CaseImageGrid title={title} label="After" images={afterImages} />
     </div>
   );
 }
@@ -107,10 +144,7 @@ export function WorkPage() {
                 className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm"
               >
                 <div className="grid gap-0 lg:grid-cols-2">
-                  <div className="grid border-b border-neutral-200 lg:border-b-0 lg:border-r lg:grid-cols-2">
-                    <CaseImageGrid title={item.title} label="Before" images={item.before_images} />
-                    <CaseImageGrid title={item.title} label="After" images={item.after_images} />
-                  </div>
+                  <CaseImagesSection title={item.title} beforeImages={item.before_images} afterImages={item.after_images} />
 
                   <div className="p-6 md:p-8">
                     <div className="flex flex-wrap items-center gap-2">
