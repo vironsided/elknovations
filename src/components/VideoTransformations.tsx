@@ -72,10 +72,10 @@ export function VideoTransformations() {
         </motion.div>
 
         {/* Cinema layout: featured left + thumbnails right */}
-        <div className="grid gap-4 lg:grid-cols-[1fr_300px] lg:gap-5">
+        <div className="grid items-start gap-4 lg:grid-cols-[1fr_300px] lg:gap-5">
           {/* ── Featured video ── */}
           <motion.div
-            className="relative overflow-hidden rounded-2xl bg-neutral-900 lg:rounded-3xl"
+            className="relative self-start overflow-hidden rounded-2xl bg-neutral-900 lg:rounded-3xl"
             initial={{ opacity: 0, scale: 0.97 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -149,7 +149,7 @@ export function VideoTransformations() {
           </motion.div>
 
           {/* ── Thumbnail rail ── */}
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 lg:gap-4">
+          <div className="grid grid-cols-2 gap-3 lg:max-h-[clamp(360px,52vw,620px)] lg:grid-cols-1 lg:gap-4 lg:overflow-y-auto lg:pr-1">
             {videos.map((video, i) => {
               const isActive = activeIdx === i;
               return (
