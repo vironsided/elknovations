@@ -42,13 +42,13 @@ Deno.serve(async (req) => {
   }
 
   const apiKey = (Deno.env.get("RESEND_API_KEY") ?? "").trim();
-  const toEmail = (Deno.env.get("CONTACT_TO_EMAIL") ?? "").trim();
+  const toEmail = "elknovations@gmail.com";
   const fromEmail = (Deno.env.get("CONTACT_FROM_EMAIL") ?? "onboarding@resend.dev").trim();
 
-  if (!apiKey || !toEmail) {
+  if (!apiKey) {
     return jsonResponse(500, {
       success: false,
-      message: "Server is not configured. Missing RESEND_API_KEY or CONTACT_TO_EMAIL.",
+      message: "Server is not configured. Missing RESEND_API_KEY.",
     });
   }
 

@@ -426,8 +426,8 @@ export const contact = {
   intro:
     "For inquiries or to explore your project, contact our team using the details below.",
   office: "Serving homeowners nationwide — schedule a call for your region.",
-  email: "vusal.teymurov520@gmail.com",
-  phone: "(555) 010-4200",
+  email: "elknovations@gmail.com",
+  phone: "(301) 825 4740",
 };
 
 export const footerLinks = [
