@@ -74,6 +74,59 @@ export type Transformation = {
 
 type SiteSettings = Record<string, unknown>;
 
+const PLACEHOLDER_PATTERNS = [
+  /template/i,
+  /lorem ipsum/i,
+  /test/i,
+  /qwe/i,
+  /asd/i,
+  /sample/i,
+  /demo/i,
+];
+
+function hasPlaceholderText(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const normalized = value.trim();
+  if (!normalized) return true;
+  return PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+function hasRealImage(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return false;
+  return /^https?:\/\//.test(normalized) || normalized.startsWith("/");
+}
+
+function wordCount(value: string | undefined): number {
+  if (!value) return 0;
+  return value.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function isValidService(item: { title?: string; description?: string; image_url?: string }) {
+  if (hasPlaceholderText(item.title) || hasPlaceholderText(item.description)) return false;
+  if (wordCount(item.description) < 10) return false;
+  return hasRealImage(item.image_url);
+}
+
+function isValidTestimonial(item: { name?: string; text?: string }) {
+  if (hasPlaceholderText(item.name) || hasPlaceholderText(item.text)) return false;
+  return (item.text?.trim().split(/\s+/).length ?? 0) >= 8;
+}
+
+function isValidProject(item: {
+  title?: string;
+  description?: string;
+  quote?: string;
+  image_url?: string;
+}) {
+  if (hasPlaceholderText(item.title) || hasPlaceholderText(item.description) || hasPlaceholderText(item.quote)) {
+    return false;
+  }
+  if (wordCount(item.description) < 12 || wordCount(item.quote) < 8) return false;
+  return hasRealImage(item.image_url);
+}
+
 function useFetch<T>(table: string, fallback: T[], orderBy = "sort_order"): { data: T[]; loading: boolean } {
   const [data, setData] = useState<T[]>(fallback);
   const [loading, setLoading] = useState(supabaseConfigured);
@@ -123,7 +176,10 @@ export function useServices() {
     icon: s.icon,
     sort_order: 0,
   }));
-  return useFetch<ServiceItem & { image_url?: string }>("services", mapped as never[]);
+  const { data, loading } = useFetch<ServiceItem & { image_url?: string }>("services", mapped as never[]);
+  const cleanData = data.filter((item) => isValidService(item));
+  // Keep homepage quality high: if admin data is sparse/noisy, fall back to curated defaults.
+  return { data: cleanData.length >= 6 ? cleanData : mapped, loading };
 }
 
 export function useProjects() {
@@ -139,7 +195,9 @@ export function useProjects() {
     theme: p.theme,
     sort_order: i,
   }));
-  return useFetch<Project>("projects", mapped);
+  const { data, loading } = useFetch<Project>("projects", mapped);
+  const cleanData = data.filter((item) => isValidProject(item));
+  return { data: cleanData.length >= 3 ? cleanData : mapped, loading };
 }
 
 export function useFaqs() {
@@ -159,7 +217,16 @@ export function useTestimonials() {
     text: t.text,
     sort_order: i,
   }));
-  return useFetch<Testimonial>("testimonials", mapped);
+  const { data, loading } = useFetch<Testimonial>("testimonials", mapped);
+  const uniqueByText = new Map<string, Testimonial>();
+  data.forEach((item) => {
+    const key = (item.text ?? "").trim().toLowerCase();
+    if (!key || uniqueByText.has(key)) return;
+    uniqueByText.set(key, item);
+  });
+  const deduped = Array.from(uniqueByText.values());
+  const cleanData = deduped.filter((item) => isValidTestimonial(item));
+  return { data: cleanData.length >= 12 ? cleanData : mapped, loading };
 }
 
 export function useBrand() { return useSetting("brand", fallbackBrand); }
