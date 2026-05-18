@@ -1,19 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import { parseImageField } from "../utils/imageFields";
-import {
-  services as fallbackServices,
-  projects as fallbackProjects,
-  transformations as fallbackTransformations,
-  faqs as fallbackFaqs,
-  testimonials as fallbackTestimonials,
-  brand as fallbackBrand,
-  hero as fallbackHero,
-  about as fallbackAbout,
-  contact as fallbackContact,
-  stats as fallbackStats,
-  type ServiceItem,
-} from "../data/site";
+import type { ServiceItem } from "../data/site";
 
 export type Project = {
   id: string;
@@ -74,61 +62,74 @@ export type Transformation = {
 
 type SiteSettings = Record<string, unknown>;
 
-const PLACEHOLDER_PATTERNS = [
-  /template/i,
-  /lorem ipsum/i,
-  /test/i,
-  /qwe/i,
-  /asd/i,
-  /sample/i,
-  /demo/i,
-];
+type Brand = {
+  name: string;
+  short: string;
+  tagline: string;
+  lead: string;
+};
 
-function hasPlaceholderText(value: unknown): boolean {
-  if (typeof value !== "string") return false;
-  const normalized = value.trim();
-  if (!normalized) return true;
-  return PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(normalized));
-}
+type Hero = {
+  badge: string;
+  cta: string;
+  image: string;
+  quote: string;
+  quoteAuthor: string;
+};
 
-function hasRealImage(value: unknown): boolean {
-  if (typeof value !== "string") return false;
-  const normalized = value.trim().toLowerCase();
-  if (!normalized) return false;
-  return /^https?:\/\//.test(normalized) || normalized.startsWith("/");
-}
+type About = {
+  badge: string;
+  title: string;
+  body: string;
+};
 
-function wordCount(value: string | undefined): number {
-  if (!value) return 0;
-  return value.trim().split(/\s+/).filter(Boolean).length;
-}
+type Contact = {
+  badge: string;
+  title: string;
+  intro: string;
+  office: string;
+  email: string;
+  phone: string;
+};
 
-function isValidService(item: { title?: string; description?: string; image_url?: string }) {
-  if (hasPlaceholderText(item.title) || hasPlaceholderText(item.description)) return false;
-  if (wordCount(item.description) < 10) return false;
-  return hasRealImage(item.image_url);
-}
+type StatItem = {
+  value: string;
+  label: string;
+  sub: string;
+};
 
-function isValidTestimonial(item: { name?: string; text?: string }) {
-  if (hasPlaceholderText(item.name) || hasPlaceholderText(item.text)) return false;
-  return (item.text?.trim().split(/\s+/).length ?? 0) >= 8;
-}
+const EMPTY_BRAND: Brand = {
+  name: "",
+  short: "",
+  tagline: "",
+  lead: "",
+};
 
-function isValidProject(item: {
-  title?: string;
-  description?: string;
-  quote?: string;
-  image_url?: string;
-}) {
-  if (hasPlaceholderText(item.title) || hasPlaceholderText(item.description) || hasPlaceholderText(item.quote)) {
-    return false;
-  }
-  if (wordCount(item.description) < 12 || wordCount(item.quote) < 8) return false;
-  return hasRealImage(item.image_url);
-}
+const EMPTY_HERO: Hero = {
+  badge: "",
+  cta: "",
+  image: "",
+  quote: "",
+  quoteAuthor: "",
+};
 
-function useFetch<T>(table: string, fallback: T[], orderBy = "sort_order"): { data: T[]; loading: boolean } {
-  const [data, setData] = useState<T[]>(fallback);
+const EMPTY_ABOUT: About = {
+  badge: "",
+  title: "",
+  body: "",
+};
+
+const EMPTY_CONTACT: Contact = {
+  badge: "",
+  title: "",
+  intro: "",
+  office: "",
+  email: "",
+  phone: "",
+};
+
+function useFetch<T>(table: string, orderBy = "sort_order"): { data: T[]; loading: boolean } {
+  const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(supabaseConfigured);
 
   useEffect(() => {
@@ -136,7 +137,7 @@ function useFetch<T>(table: string, fallback: T[], orderBy = "sort_order"): { da
     let cancelled = false;
     (async () => {
       const { data: rows } = await supabase.from(table).select("*").order(orderBy);
-      if (!cancelled && rows && rows.length > 0) setData(rows as T[]);
+      if (!cancelled) setData((rows as T[]) ?? []);
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -168,81 +169,42 @@ function useSetting<T>(key: string, fallback: T): { data: T; loading: boolean } 
 }
 
 export function useServices() {
-  const mapped = fallbackServices.map((s) => ({
-    id: s.id,
-    title: s.title,
-    description: s.description,
-    image_url: s.image,
-    icon: s.icon,
-    sort_order: 0,
-  }));
-  const { data, loading } = useFetch<ServiceItem & { image_url?: string }>("services", mapped as never[]);
-  const cleanData = data.filter((item) => isValidService(item));
-  // Keep homepage quality high: if admin data is sparse/noisy, fall back to curated defaults.
-  return { data: cleanData.length >= 6 ? cleanData : mapped, loading };
+  return useFetch<ServiceItem & { image_url?: string }>("services");
 }
 
 export function useProjects() {
-  const mapped = fallbackProjects.map((p, i) => ({
-    id: String(i),
-    title: p.title,
-    category: p.category,
-    duration: p.duration,
-    description: p.description,
-    quote: p.quote,
-    author: p.author,
-    image_url: p.image,
-    theme: p.theme,
-    sort_order: i,
-  }));
-  const { data, loading } = useFetch<Project>("projects", mapped);
-  const cleanData = data.filter((item) => isValidProject(item));
-  return { data: cleanData.length >= 3 ? cleanData : mapped, loading };
+  return useFetch<Project>("projects");
 }
 
 export function useFaqs() {
-  const mapped = fallbackFaqs.map((f, i) => ({
-    id: String(i),
-    question: f.q,
-    answer: f.a,
-    sort_order: i,
-  }));
-  return useFetch<FAQ>("faqs", mapped);
+  return useFetch<FAQ>("faqs");
 }
 
 export function useTestimonials() {
-  const mapped = fallbackTestimonials.map((t, i) => ({
-    id: String(i),
-    name: t.name,
-    text: t.text,
-    sort_order: i,
-  }));
-  const { data, loading } = useFetch<Testimonial>("testimonials", mapped);
+  const { data, loading } = useFetch<Testimonial>("testimonials");
   const uniqueByText = new Map<string, Testimonial>();
   data.forEach((item) => {
     const key = (item.text ?? "").trim().toLowerCase();
     if (!key || uniqueByText.has(key)) return;
     uniqueByText.set(key, item);
   });
-  const deduped = Array.from(uniqueByText.values());
-  const cleanData = deduped.filter((item) => isValidTestimonial(item));
-  return { data: cleanData.length >= 12 ? cleanData : mapped, loading };
+  return { data: Array.from(uniqueByText.values()), loading };
 }
 
-export function useBrand() { return useSetting("brand", fallbackBrand); }
-export function useHero() { return useSetting("hero", fallbackHero); }
-export function useAbout() { return useSetting("about", fallbackAbout); }
-export function useContact() { return useSetting("contact", fallbackContact); }
+export function useBrand() { return useSetting("brand", EMPTY_BRAND); }
+export function useHero() { return useSetting("hero", EMPTY_HERO); }
+export function useAbout() { return useSetting("about", EMPTY_ABOUT); }
+export function useContact() { return useSetting("contact", EMPTY_CONTACT); }
 export function useStats() {
-  return useSetting("stats", fallbackStats);
+  return useSetting<StatItem[]>("stats", []);
 }
 
 export function useSocialLinks() {
-  return useFetch<SocialLink>("social_links", []);
+  return useFetch<SocialLink>("social_links");
 }
 
 export function useWorkCategories() {
-  return useFetch<WorkCategory>("work_categories", []);
+  return useFetch<WorkCategory>("work_categories");
 }
 
 export function useWorkCases(selectedCategory = "all"): { data: WorkCase[]; loading: boolean } {
@@ -290,17 +252,9 @@ export function useSettings(key: string) {
 }
 
 export function useGoogleReviews() {
-  return useFetch<GoogleReview>("google_reviews", []);
+  return useFetch<GoogleReview>("google_reviews");
 }
 
 export function useTransformations() {
-  const mapped = fallbackTransformations.map((item, i) => ({
-    id: item.id,
-    src: item.src,
-    title: item.title,
-    description: item.description,
-    tag: item.tag,
-    sort_order: i,
-  }));
-  return useFetch<Transformation>("transformations", mapped);
+  return useFetch<Transformation>("transformations");
 }

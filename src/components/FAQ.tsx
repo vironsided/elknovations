@@ -7,6 +7,8 @@ export function FAQ() {
   const { data: faqItems } = useFaqs();
   const [open, setOpen] = useState<number | null>(0);
 
+  if (faqItems.length === 0) return null;
+
   return (
     <section id="faq" className="scroll-mt-24 bg-white px-5 py-20 md:px-10 lg:px-14 lg:py-28">
       <div className="mx-auto grid max-w-[1400px] gap-12 lg:grid-cols-12 lg:gap-16">

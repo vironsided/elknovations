@@ -4,6 +4,8 @@ import { useStats } from "../hooks/useSiteData";
 export function Stats() {
   const { data: stats } = useStats();
 
+  if (stats.length === 0) return null;
+
   return (
     <section className="relative overflow-hidden border-y border-neutral-800 bg-neutral-950 px-5 py-16 md:px-10 lg:px-14 lg:py-24">
       {/* Ambient warm glow centered */}

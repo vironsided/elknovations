@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { nav } from "../data/site";
 import { useBrand } from "../hooks/useSiteData";
+
+const nav = [
+  { label: "About", href: "#about" },
+  { label: "Services", href: "#services" },
+  { label: "Our work", href: "#work" },
+  { label: "FAQs", href: "#faq" },
+  { label: "Contact", href: "#contact" },
+];
 
 function scrollToSection(href: string) {
   const id = href.replace(/^#/, "");

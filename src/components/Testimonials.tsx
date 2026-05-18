@@ -13,6 +13,7 @@ function StarRow() {
 
 export function Testimonials() {
   const { data: testimonials } = useTestimonials();
+  if (testimonials.length === 0) return null;
   const rowForward = [...testimonials, ...testimonials];
   const reversed = [...testimonials].reverse();
   const rowReverse = [...reversed, ...reversed];

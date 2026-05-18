@@ -14,6 +14,7 @@ const fadeUp = {
 export function Hero() {
   const { data: brand } = useBrand();
   const { data: hero } = useHero();
+  if (!brand.tagline && !hero.image) return null;
 
   return (
     <section id="hero" className="relative bg-black pb-6 pt-[4.5rem] md:px-6 lg:px-8 lg:pb-8">

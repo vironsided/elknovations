@@ -20,6 +20,8 @@ export function Services() {
   const [active, setActive] = useState(0);
   const { data: services } = useServices();
 
+  if (services.length === 0) return null;
+
   return (
     <section id="services" className="scroll-mt-24 bg-white px-5 py-20 md:px-10 lg:px-14 lg:py-28">
       <div className="mx-auto max-w-[1400px]">
@@ -43,8 +45,8 @@ export function Services() {
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-neutral-100 md:aspect-[5/6]">
             <AnimatePresence mode="wait">
               <motion.img
-                key={services[active].id}
-                src={(services[active] as { image_url?: string; image?: string }).image_url || (services[active] as { image?: string }).image || ""}
+                key={services[active]?.id ?? "empty"}
+                src={(services[active] as { image_url?: string; image?: string })?.image_url || (services[active] as { image?: string })?.image || ""}
                 alt=""
                 className="absolute inset-0 h-full w-full object-cover"
                 initial={{ opacity: 0, scale: 1.04 }}
