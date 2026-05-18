@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainSite } from "./components/MainSite";
-import { ScrollReset } from "./components/ScrollReset";
 const WorkPage = lazy(() => import("./components/WorkPage").then((m) => ({ default: m.WorkPage })));
 
 const Login = lazy(() => import("./components/admin/Login").then((m) => ({ default: m.Login })));
@@ -31,7 +30,6 @@ function Spinner() {
 function App() {
   return (
     <BrowserRouter>
-      <ScrollReset />
       <Suspense fallback={<Spinner />}>
         <Routes>
           <Route path="/" element={<MainSite />} />
