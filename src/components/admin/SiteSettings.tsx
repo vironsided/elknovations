@@ -150,6 +150,18 @@ export function SiteSettings() {
             {textField("Badge", about.badge, (v) => setAbout({ ...about, badge: v }))}
             {textField("Title", about.title, (v) => setAbout({ ...about, title: v }))}
             {textField("Body", about.body, (v) => setAbout({ ...about, body: v }), true)}
+            <div>
+              <label className="mb-1 block text-xs font-medium text-neutral-600">About gallery images</label>
+              <ImageUpload
+                currentUrls={about.images ?? []}
+                onUploadedUrls={(urls) => setAbout({ ...about, images: urls })}
+                multiple
+                folder="about"
+              />
+              <p className="mt-1 text-xs text-neutral-500">
+                Upload photos for the About section gallery.
+              </p>
+            </div>
           </div>
         </section>
 

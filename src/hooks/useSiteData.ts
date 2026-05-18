@@ -81,6 +81,7 @@ type About = {
   badge: string;
   title: string;
   body: string;
+  images: string[];
 };
 
 type Contact = {
@@ -117,6 +118,7 @@ const EMPTY_ABOUT: About = {
   badge: "",
   title: "",
   body: "",
+  images: [],
 };
 
 const EMPTY_CONTACT: Contact = {

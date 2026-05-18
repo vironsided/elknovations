@@ -19,7 +19,8 @@ const item = {
 
 export function About() {
   const { data: about } = useAbout();
-  if (!about.badge && !about.title && !about.body) return null;
+  const galleryImages = Array.isArray(about.images) ? about.images.filter(Boolean) : [];
+  if (!about.badge && !about.title && !about.body && galleryImages.length === 0) return null;
 
   return (
     <section id="about" className="scroll-mt-24 bg-white py-20 md:py-24 lg:py-28">
@@ -56,6 +57,33 @@ export function About() {
           </motion.p>
         </div>
       </div>
+
+      {galleryImages.length > 0 && (
+        <motion.div
+          className="mt-16 w-full overflow-hidden"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="about-gallery-marquee gap-3 md:gap-4">
+            {[...galleryImages, ...galleryImages].map((src, i) => (
+              <div
+                key={`${src}-${i}`}
+                className="relative h-64 w-44 shrink-0 overflow-hidden md:h-80 md:w-52 lg:h-[22rem] lg:w-60"
+              >
+                <img
+                  src={src}
+                  alt=""
+                  className="h-full w-full object-cover select-none"
+                  loading="lazy"
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </section>
   );
 }
