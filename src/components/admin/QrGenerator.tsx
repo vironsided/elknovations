@@ -1,7 +1,5 @@
-import { useMemo, useState } from "react";
-import QRCode from "react-qr-code";
+import { useEffect, useMemo, useState } from "react";
 import { Download, FileImage, FileType2, FileText, Lock, Unlock } from "lucide-react";
-import { jsPDF } from "jspdf";
 import QRCodeLib from "qrcode";
 
 const DEFAULT_URL = "https://www.elknovations.com/";
@@ -26,10 +24,30 @@ export function QrGenerator() {
   const [url, setUrl] = useState(DEFAULT_URL);
   const [size, setSize] = useState(360);
   const [urlLocked, setUrlLocked] = useState(true);
+  const [previewDataUrl, setPreviewDataUrl] = useState<string>("");
   const [downloading, setDownloading] = useState<Format | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const finalSize = useMemo(() => safeSize(size), [size]);
+  const trimmedUrl = useMemo(() => url.trim(), [url]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!trimmedUrl) {
+      setPreviewDataUrl("");
+      return;
+    }
+    QRCodeLib.toDataURL(trimmedUrl, { width: finalSize, margin: 1 })
+      .then((data) => {
+        if (!cancelled) setPreviewDataUrl(data);
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewDataUrl("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [trimmedUrl, finalSize]);
 
   function fileBaseName() {
     return "elknovations-qr-code";
@@ -89,6 +107,7 @@ export function QrGenerator() {
         margin: 1,
       });
 
+      const { jsPDF } = await import("jspdf");
       const doc = new jsPDF({
         unit: "pt",
         format: "a4",
@@ -235,7 +254,13 @@ export function QrGenerator() {
           <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6">
             <div className="mx-auto w-fit rounded-lg bg-white p-3 shadow-sm">
               {url.trim() ? (
-                <QRCode value={url.trim()} size={finalSize} />
+                <img
+                  src={previewDataUrl}
+                  width={finalSize}
+                  height={finalSize}
+                  alt="QR preview"
+                  className="block"
+                />
               ) : (
                 <div className="grid h-[260px] w-[260px] place-items-center text-sm text-neutral-500">
                   Enter a URL to generate a QR code.
