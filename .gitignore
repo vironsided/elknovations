@@ -25,3 +25,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+docs/work-cases-zapolnenie-klienta.pdf
+docs/work-cases-zapolnenie-klienta.html

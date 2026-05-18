@@ -16,6 +16,7 @@ const WorkCasesManager = lazy(() => import("./components/admin/WorkCasesManager"
 const TransformationsManager = lazy(() => import("./components/admin/TransformationsManager").then((m) => ({ default: m.TransformationsManager })));
 const SocialLinksManager = lazy(() => import("./components/admin/SocialLinksManager").then((m) => ({ default: m.SocialLinksManager })));
 const SiteSettings = lazy(() => import("./components/admin/SiteSettings").then((m) => ({ default: m.SiteSettings })));
+const QrGenerator = lazy(() => import("./components/admin/QrGenerator").then((m) => ({ default: m.QrGenerator })));
 const ProtectedRoute = lazy(() => import("./components/ui/ProtectedRoute").then((m) => ({ default: m.ProtectedRoute })));
 
 function Spinner() {
@@ -54,6 +55,7 @@ function App() {
             <Route path="transformations" element={<TransformationsManager />} />
             <Route path="social-links" element={<SocialLinksManager />} />
             <Route path="settings" element={<SiteSettings />} />
+            <Route path="qr-generator" element={<QrGenerator />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

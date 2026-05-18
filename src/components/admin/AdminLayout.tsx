@@ -11,6 +11,7 @@ import {
   Clapperboard,
   Settings,
   Share2,
+  QrCode,
   LogOut,
   ArrowLeft,
 } from "lucide-react";
@@ -27,6 +28,7 @@ const links = [
   { to: "/admin/work-cases", label: "Work Cases", icon: Images },
   { to: "/admin/transformations", label: "Transformations", icon: Clapperboard },
   { to: "/admin/social-links", label: "Social Links", icon: Share2 },
+  { to: "/admin/qr-generator", label: "QR Generator", icon: QrCode },
   { to: "/admin/settings", label: "Site Settings", icon: Settings },
 ];
 
