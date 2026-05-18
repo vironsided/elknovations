@@ -8,6 +8,15 @@
       name="description"
       content="Elk Novations — remodeling, construction, and electrical. Quality home improvements across the United States."
     />
+    <script>
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+      if (location.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+      window.scrollTo(0, 0);
+    </script>
     <title>Elk Novations | Home Improvement</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
