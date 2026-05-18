@@ -29,6 +29,7 @@ export const about = {
   title: "home improvement specialists",
   body:
     "Welcome to Elk Novations—your partners for remodeling and construction done right. From kitchens and baths to garages and additions, we focus on clear communication, careful planning, and workmanship that lasts. Our mission is to bring your vision to life with guidance at every step—so you end up in a home you love.",
+  images: [] as string[],
 };
 
 export const galleryImages = [
