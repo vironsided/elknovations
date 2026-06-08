@@ -13,8 +13,6 @@ type WorkCase = {
   completed_at: string | null;
   summary: string;
   scope_details: string;
-  materials: string;
-  total_price_usd: number;
   before_images: string[];
   after_images: string[];
   latitude: number | null;
@@ -29,8 +27,6 @@ const empty: Omit<WorkCase, "id"> = {
   completed_at: null,
   summary: "",
   scope_details: "",
-  materials: "",
-  total_price_usd: 0,
   before_images: [],
   after_images: [],
   latitude: null,
@@ -51,6 +47,7 @@ export function WorkCasesManager() {
   const [editing, setEditing] = useState<WorkCase | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [hasBefore, setHasBefore] = useState(true);
 
   async function load() {
     if (!supabaseConfigured) return;
@@ -74,11 +71,20 @@ export function WorkCasesManager() {
 
   function startNew() {
     setEditing({ id: "", ...empty, sort_order: items.length });
+    setHasBefore(true);
     setIsNew(true);
   }
   function startEdit(item: WorkCase) {
     setEditing({ ...item });
+    setHasBefore(item.before_images.length > 0);
     setIsNew(false);
+  }
+
+  function toggleHasBefore(checked: boolean) {
+    setHasBefore(checked);
+    // Clearing "before" photos when the project has none keeps the public site
+    // from rendering Before/After labels for after-only cases.
+    if (!checked && editing) setEditing({ ...editing, before_images: [] });
   }
   function cancel() {
     setEditing(null);
@@ -95,8 +101,6 @@ export function WorkCasesManager() {
       completed_at: editing.completed_at,
       summary: editing.summary,
       scope_details: editing.scope_details,
-      materials: editing.materials,
-      total_price_usd: editing.total_price_usd,
       before_image_url: stringifyImageField(editing.before_images),
       after_image_url: stringifyImageField(editing.after_images),
       latitude: editing.latitude,
@@ -203,25 +207,6 @@ export function WorkCasesManager() {
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
               />
             </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-medium text-neutral-600">Materials</label>
-              <textarea
-                value={editing.materials}
-                onChange={(e) => setEditing({ ...editing, materials: e.target.value })}
-                rows={3}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-600">Price (USD)</label>
-              <input
-                type="number"
-                min={0}
-                value={editing.total_price_usd}
-                onChange={(e) => setEditing({ ...editing, total_price_usd: Number(e.target.value) || 0 })}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
-              />
-            </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-neutral-600">Sort order</label>
               <input
@@ -259,15 +244,32 @@ export function WorkCasesManager() {
                 right-click the exact spot → click the decimal coordinates (e.g. <code>40.712776, -74.005974</code>) to copy, then paste the first number into Latitude and the second into Longitude.
               </p>
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-600">Before images</label>
-              <ImageUpload
-                currentUrls={editing.before_images}
-                onUploadedUrls={(urls) => setEditing({ ...editing, before_images: urls })}
-                multiple
-                folder="work-cases/before"
-              />
+            <div className="sm:col-span-2">
+              <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-neutral-700">
+                <input
+                  type="checkbox"
+                  checked={hasBefore}
+                  onChange={(e) => toggleHasBefore(e.target.checked)}
+                  className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+                />
+                This project has "before" photos
+              </label>
+              <p className="mt-1 text-xs text-neutral-500">
+                Uncheck for already-renovated projects with no "before" photo. Then only "after" photos are
+                uploaded, and the public site shows them without Before/After labels.
+              </p>
             </div>
+            {hasBefore && (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-neutral-600">Before images</label>
+                <ImageUpload
+                  currentUrls={editing.before_images}
+                  onUploadedUrls={(urls) => setEditing({ ...editing, before_images: urls })}
+                  multiple
+                  folder="work-cases/before"
+                />
+              </div>
+            )}
             <div>
               <label className="mb-1 block text-xs font-medium text-neutral-600">After images</label>
               <ImageUpload

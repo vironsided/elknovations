@@ -29,10 +29,15 @@ function ProjectImageStrip({
   after: string[];
   title: string;
 }) {
+  const cleanBefore = before.filter((src) => src && src.trim().length > 0);
+  const cleanAfter = after.filter((src) => src && src.trim().length > 0);
+  // Only label slides when both before and after photos exist. For after-only
+  // projects (already renovated, no "before"), photos show without a badge.
+  const showLabel = cleanBefore.length > 0 && cleanAfter.length > 0;
   const slides = [
-    ...after.map((src) => ({ src, label: "After" })),
-    ...before.map((src) => ({ src, label: "Before" })),
-  ].filter((slide) => slide.src && slide.src.trim().length > 0);
+    ...cleanAfter.map((src) => ({ src, label: "After" })),
+    ...cleanBefore.map((src) => ({ src, label: "Before" })),
+  ];
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -84,9 +89,11 @@ function ProjectImageStrip({
           <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2" />
         </>
       )}
-      <span className="absolute right-2.5 top-2.5 rounded-md bg-black/55 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-        {current.label}
-      </span>
+      {showLabel && (
+        <span className="absolute right-2.5 top-2.5 rounded-md bg-black/55 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+          {current.label}
+        </span>
+      )}
       {slides.length > 1 && (
         <div className="absolute bottom-2.5 left-0 right-0 flex flex-col items-center gap-1">
           <div className="flex justify-center gap-1.5">

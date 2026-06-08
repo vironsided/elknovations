@@ -10,19 +10,27 @@ function formatDate(value: string | null) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
 }
 
-function formatPrice(price: number) {
-  if (!Number.isFinite(price) || price <= 0) return "Price on request";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(price);
-}
-
-function CaseImageGrid({ title, label, images }: { title: string; label: "Before" | "After"; images: string[] }) {
+function CaseImageGrid({
+  title,
+  label,
+  images,
+  showLabel = true,
+}: {
+  title: string;
+  label?: "Before" | "After";
+  images: string[];
+  showLabel?: boolean;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const captionLabel = (label ?? "Project").toLowerCase();
 
   if (images.length === 0) {
     return (
       <div className="relative flex h-full min-h-56 items-center justify-center bg-neutral-100 text-sm text-neutral-400 sm:min-h-72 lg:min-h-80">
-        No {label.toLowerCase()} image
-        <span className="absolute left-3 top-3 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
+        No {captionLabel} image
+        {showLabel && label && (
+          <span className="absolute left-3 top-3 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
+        )}
       </div>
     );
   }
@@ -32,11 +40,13 @@ function CaseImageGrid({ title, label, images }: { title: string; label: "Before
 
   return (
     <div className="relative h-full border-b border-neutral-200 bg-neutral-50 p-3 last:border-b-0 lg:border-b-0 lg:border-r lg:last:border-r-0">
-      <span className="absolute left-5 top-5 z-10 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
+      {showLabel && label && (
+        <span className="absolute left-5 top-5 z-10 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
+      )}
       <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
         <img
           src={activeImage}
-          alt={`${title} ${label.toLowerCase()} ${safeIndex + 1}`}
+          alt={`${title} ${captionLabel} ${safeIndex + 1}`}
           className="h-56 w-full object-cover sm:h-72 lg:h-80"
         />
       </div>
@@ -52,11 +62,11 @@ function CaseImageGrid({ title, label, images }: { title: string; label: "Before
                   ? "border-neutral-900 ring-1 ring-neutral-900"
                   : "border-neutral-200 hover:border-neutral-400"
               }`}
-              aria-label={`Show ${label.toLowerCase()} image ${index + 1}`}
+              aria-label={`Show ${captionLabel} image ${index + 1}`}
             >
               <img
                 src={src}
-                alt={`${title} ${label.toLowerCase()} thumbnail ${index + 1}`}
+                alt={`${title} ${captionLabel} thumbnail ${index + 1}`}
                 className="h-14 w-20 object-cover sm:h-16 sm:w-24"
               />
             </button>
@@ -71,6 +81,20 @@ function CaseImageGrid({ title, label, images }: { title: string; label: "Before
 }
 
 function CaseImagesSection({ title, beforeImages, afterImages }: { title: string; beforeImages: string[]; afterImages: string[] }) {
+  const hasBefore = beforeImages.length > 0;
+  const hasAfter = afterImages.length > 0;
+
+  // Show Before/After labels only when both sets exist. When only one set is
+  // present (e.g. an already-renovated project without "before" photos), render
+  // a single column with no label badge.
+  if (!hasBefore || !hasAfter) {
+    return (
+      <div className="border-b border-neutral-200 lg:border-b-0 lg:border-r">
+        <CaseImageGrid title={title} images={hasAfter ? afterImages : beforeImages} showLabel={false} />
+      </div>
+    );
+  }
+
   return (
     <div className="grid border-b border-neutral-200 lg:border-b-0 lg:border-r lg:grid-cols-2">
       <CaseImageGrid title={title} label="Before" images={beforeImages} />
@@ -101,7 +125,7 @@ export function WorkPage() {
               Renovation portfolio
             </h1>
             <p className="mt-3 max-w-2xl text-neutral-600">
-              Explore before-and-after projects, detailed scope, materials, and average pricing.
+              Explore before-and-after projects with detailed scope of work.
             </p>
           </div>
           <Link
@@ -162,20 +186,11 @@ export function WorkPage() {
                     <h2 className="mt-4 text-2xl font-semibold tracking-tight text-neutral-900">{item.title}</h2>
                     <p className="mt-3 text-sm leading-relaxed text-neutral-600">{item.summary}</p>
 
-                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    <div className="mt-6">
                       <div className="rounded-xl bg-neutral-50 p-4">
                         <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Work scope</p>
                         <p className="mt-2 text-sm leading-relaxed text-neutral-700">{item.scope_details || "Not provided."}</p>
                       </div>
-                      <div className="rounded-xl bg-neutral-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Materials</p>
-                        <p className="mt-2 text-sm leading-relaxed text-neutral-700">{item.materials || "Not provided."}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 border-t border-neutral-200 pt-5">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Average project cost</p>
-                      <p className="mt-1 text-2xl font-semibold text-neutral-900">{formatPrice(Number(item.total_price_usd))}</p>
                     </div>
                   </div>
                 </div>
