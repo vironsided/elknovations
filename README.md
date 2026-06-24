@@ -1,4 +1,4 @@
-# Elk Novations — marketing site + admin panel --- elknovations.com
+# Elk Novations — marketing site + admin panel --- https://www.elknovations.com
 
 React 19 + TypeScript + Vite + Tailwind v4 + Framer Motion.  
 Admin panel backed by **Supabase** (free tier) for managing all site content.
