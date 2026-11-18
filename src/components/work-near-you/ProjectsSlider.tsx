@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { WorkCase } from "../../hooks/useSiteData";
+import { SmartImage } from "../ui/SmartImage";
 
 type Props = { cases: WorkCase[]; projectCount: number };
 
@@ -62,10 +63,11 @@ function ProjectImageStrip({
         else goPrev();
       }}
     >
-      <img
+      <SmartImage
         src={current.src}
+        widths={[384, 640, 828]}
+        sizes="(min-width: 640px) 300px, 92vw"
         alt={title}
-        loading="lazy"
         className="h-full w-full object-cover transition duration-300"
       />
       {slides.length > 1 && (

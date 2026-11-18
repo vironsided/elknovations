@@ -1,15 +1,10 @@
-import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { useBrand, useHero } from "../hooks/useSiteData";
+import { SmartImage } from "./ui/SmartImage";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.12 * i, duration: 0.65, ease: [0.22, 1, 0.36, 1] as const },
-  }),
-};
+// Entrance animations are plain CSS (see .hero-fade-up in index.css) so they start with
+// the first paint instead of waiting for JavaScript.
+const delay = (i: number) => ({ animationDelay: `${0.12 * i}s` });
 
 export function Hero() {
   const { data: brand } = useBrand();
@@ -33,38 +28,29 @@ export function Hero() {
       <div className="mx-auto max-w-[1600px] overflow-hidden rounded-t-[1.75rem] bg-black sm:rounded-t-[2rem] lg:min-h-[calc(100svh-4.5rem-1rem)] lg:rounded-t-[2.5rem]">
         <div className="grid min-h-[min(100svh,920px)] grid-cols-1 lg:grid-cols-2 lg:min-h-[calc(100svh-4.5rem-2rem)]">
           <div className="relative z-10 flex flex-col justify-center px-6 pb-12 pt-10 md:px-12 lg:px-14 lg:pb-16 lg:pt-12">
-            <motion.span
-              custom={0}
-              initial="hidden"
-              animate="show"
-              variants={fadeUp}
-              className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300/90 backdrop-blur-sm"
+            <span
+              style={delay(0)}
+              className="hero-fade-up mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300/90 backdrop-blur-sm"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden />
               {hero.badge}
-            </motion.span>
+            </span>
 
-            <motion.h1
-              custom={1}
-              initial="hidden"
-              animate="show"
-              variants={fadeUp}
-              className="max-w-xl text-4xl font-semibold leading-[1.08] tracking-tight text-white md:text-5xl lg:text-[3.25rem]"
+            <h1
+              style={delay(1)}
+              className="hero-fade-up max-w-xl text-4xl font-semibold leading-[1.08] tracking-tight text-white md:text-5xl lg:text-[3.25rem]"
             >
               {brand.tagline}
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              custom={2}
-              initial="hidden"
-              animate="show"
-              variants={fadeUp}
-              className="mt-6 max-w-md text-base leading-relaxed text-neutral-400 md:text-lg"
+            <p
+              style={delay(2)}
+              className="hero-fade-up mt-6 max-w-md text-base leading-relaxed text-neutral-400 md:text-lg"
             >
               {brand.lead}
-            </motion.p>
+            </p>
 
-            <motion.div custom={3} initial="hidden" animate="show" variants={fadeUp} className="mt-10 flex flex-wrap items-center gap-4">
+            <div style={delay(3)} className="hero-fade-up mt-10 flex flex-wrap items-center gap-4">
               <a
                 href="#contact"
                 className="group inline-flex items-center gap-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-5 py-3 text-sm font-semibold text-amber-200 backdrop-blur-sm transition hover:bg-amber-500/20"
@@ -80,15 +66,12 @@ export function Hero() {
               >
                 See our work
               </a>
-            </motion.div>
+            </div>
 
             {/* Trust badges */}
-            <motion.div
-              custom={4}
-              initial="hidden"
-              animate="show"
-              variants={fadeUp}
-              className="mt-10 flex items-center gap-6 border-t border-white/5 pt-8"
+            <div
+              style={delay(4)}
+              className="hero-fade-up mt-10 flex items-center gap-6 border-t border-white/5 pt-8"
             >
               {[["250+", "Projects"], ["8yrs", "Experience"], ["100%", "Satisfaction"]].map(([val, lbl]) => (
                 <div key={lbl} className="text-center">
@@ -96,19 +79,20 @@ export function Hero() {
                   <p className="text-xs text-neutral-500">{lbl}</p>
                 </div>
               ))}
-            </motion.div>
+            </div>
           </div>
 
           <div className="relative min-h-[48vh] lg:min-h-0">
-            <motion.div
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="relative h-full min-h-[48vh] p-4 pt-2 sm:p-5 lg:absolute lg:inset-0 lg:min-h-full lg:p-6 lg:pl-2"
+            <div
+              className="hero-zoom-in relative h-full min-h-[48vh] p-4 pt-2 sm:p-5 lg:absolute lg:inset-0 lg:min-h-full lg:p-6 lg:pl-2"
             >
               <div className="relative h-full min-h-[44vh] overflow-hidden rounded-2xl lg:min-h-0 lg:rounded-3xl">
-                <img
+                <SmartImage
                   src={hero.image}
+                  widths={[640, 828, 1080, 1600, 2048]}
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  loading="eager"
+                  fetchPriority="high"
                   alt=""
                   className="h-full w-full object-cover"
                 />
@@ -117,11 +101,9 @@ export function Hero() {
                 {/* Subtle gold tint at top corner */}
                 <div className="absolute right-0 top-0 h-40 w-40 rounded-full opacity-30" style={{ background: "radial-gradient(circle, rgba(201,169,110,0.15) 0%, transparent 70%)" }} />
 
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.55, duration: 0.6 }}
-                  className="absolute bottom-5 left-5 right-5 max-w-md rounded-2xl border border-amber-400/15 bg-black/40 p-4 backdrop-blur-md sm:bottom-8 sm:left-8 sm:right-auto"
+                <div
+                  style={{ animationDelay: "0.55s" }}
+                  className="hero-fade-up absolute bottom-5 left-5 right-5 max-w-md rounded-2xl border border-amber-400/15 bg-black/40 p-4 backdrop-blur-md sm:bottom-8 sm:left-8 sm:right-auto"
                 >
                   <div className="mb-2 flex gap-0.5 text-amber-400" aria-label="5 stars">
                     {[1, 2, 3, 4, 5].map((s) => (
@@ -130,9 +112,9 @@ export function Hero() {
                   </div>
                   <p className="text-sm leading-relaxed text-white/95">&ldquo;{hero.quote}&rdquo;</p>
                   <p className="mt-2 text-xs font-medium text-white/50">— {hero.quoteAuthor}</p>
-                </motion.div>
+                </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

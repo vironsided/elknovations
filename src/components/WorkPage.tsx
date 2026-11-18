@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useWorkCases, useWorkCategories } from "../hooks/useSiteData";
+import { SmartImage } from "./ui/SmartImage";
 
 function CaseImageGrid({
   title,
@@ -37,8 +38,10 @@ function CaseImageGrid({
         <span className="absolute left-5 top-5 z-10 rounded-full bg-black/80 px-2 py-1 text-xs font-semibold text-white">{label}</span>
       )}
       <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-        <img
+        <SmartImage
           src={activeImage}
+          widths={[640, 828, 1080, 1600]}
+          sizes="(min-width: 1024px) 33vw, 100vw"
           alt={`${title} ${captionLabel} ${safeIndex + 1}`}
           className="h-56 w-full object-cover sm:h-72 lg:h-80"
         />
@@ -57,8 +60,10 @@ function CaseImageGrid({
               }`}
               aria-label={`Show ${captionLabel} image ${index + 1}`}
             >
-              <img
+              <SmartImage
                 src={src}
+                widths={[128, 256]}
+                sizes="96px"
                 alt={`${title} ${captionLabel} thumbnail ${index + 1}`}
                 className="h-14 w-20 object-cover sm:h-16 sm:w-24"
               />

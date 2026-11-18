@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { useProjects, type Project } from "../hooks/useSiteData";
+import { SmartImage } from "./ui/SmartImage";
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const img = (project as { image_url?: string; image?: string }).image_url || (project as { image?: string }).image || "";
@@ -22,12 +23,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       <div className="grid gap-0 md:grid-cols-2">
         <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200/80 md:aspect-auto md:min-h-[340px]">
           {img ? (
-            <img
+            <SmartImage
               src={img}
+              widths={[640, 828, 1080, 1600]}
+              sizes="(min-width: 768px) 50vw, 100vw"
               alt=""
               className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
               loading={index === 0 ? "eager" : "lazy"}
-              decoding="async"
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-neutral-400">

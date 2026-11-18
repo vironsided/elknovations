@@ -8,6 +8,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useServices } from "../hooks/useSiteData";
+import { SmartImage } from "./ui/SmartImage";
+
+const MotionSmartImage = motion.create(SmartImage);
 
 const iconMap: Record<string, LucideIcon> = {
   CookingPot, Building2, Bath, Home, Paintbrush, Fence,
@@ -44,8 +47,10 @@ export function Services() {
         <div className="mt-14 grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-neutral-100 md:aspect-[5/6]">
             <AnimatePresence mode="wait">
-              <motion.img
+              <MotionSmartImage
                 key={services[active]?.id ?? "empty"}
+                widths={[640, 828, 1080, 1600]}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 src={(services[active] as { image_url?: string; image?: string })?.image_url || (services[active] as { image?: string })?.image || ""}
                 alt=""
                 className="absolute inset-0 h-full w-full object-cover"

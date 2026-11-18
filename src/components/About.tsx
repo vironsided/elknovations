@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useAbout } from "../hooks/useSiteData";
+import { SmartImage } from "./ui/SmartImage";
 
 const container = {
   hidden: {},
@@ -72,11 +73,12 @@ export function About() {
                 key={`${src}-${i}`}
                 className="relative h-64 w-44 shrink-0 overflow-hidden md:h-80 md:w-52 lg:h-[22rem] lg:w-60"
               >
-                <img
+                <SmartImage
                   src={src}
+                  widths={[256, 384, 640, 828]}
+                  sizes="(min-width: 1024px) 240px, (min-width: 768px) 208px, 176px"
                   alt=""
                   className="h-full w-full object-cover select-none"
-                  loading="lazy"
                   draggable={false}
                 />
               </div>

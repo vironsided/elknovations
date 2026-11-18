@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { Crosshair } from "lucide-react";
 import L, { type LatLngExpression, type LatLngTuple } from "leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   MapContainer,
   Marker,
@@ -12,6 +13,7 @@ import {
   ZoomControl,
 } from "react-leaflet";
 import type { WorkCase } from "../../hooks/useSiteData";
+import { SmartImage } from "../ui/SmartImage";
 
 type Props = {
   cases: WorkCase[];
@@ -131,8 +133,10 @@ export function WorkMap({ cases, onMarkerClickId }: Props) {
               <Popup>
                 <div className="flex w-56 max-w-[min(100%,224px)] flex-col gap-2">
                   {img && (
-                    <img
+                    <SmartImage
                       src={img}
+                      widths={[256, 384, 640]}
+                      sizes="224px"
                       alt={c.title}
                       className="h-24 w-full rounded object-cover"
                     />

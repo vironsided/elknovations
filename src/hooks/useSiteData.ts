@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { supabase, supabaseConfigured } from "../lib/supabase";
+import { useEffect, useMemo, useState } from "react";
 import { parseImageField } from "../utils/imageFields";
 import type { ServiceItem } from "../data/site";
 
@@ -130,40 +129,118 @@ const EMPTY_CONTACT: Contact = {
   phone: "",
 };
 
-function useFetch<T>(table: string, orderBy = "sort_order"): { data: T[]; loading: boolean } {
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(supabaseConfigured);
+// ---------------------------------------------------------------------------
+// Data loading for the public site.
+// Reads Supabase through plain PostgREST requests, so supabase-js stays out of the
+// main bundle (the admin panel still uses it). Every table is requested once per
+// page load and shared by all components. Site settings arrive in one request that
+// starts as soon as this module loads, and the last copy is kept in localStorage so
+// repeat visits can paint the hero before the network answers.
+
+const REST_URL = String(import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
+const REST_KEY = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? "");
+const dataConfigured = Boolean(REST_URL && REST_KEY);
+
+async function restSelect<T>(table: string, query: string): Promise<T[]> {
+  const res = await fetch(`${REST_URL}/rest/v1/${table}?${query}`, {
+    headers: { apikey: REST_KEY, Authorization: `Bearer ${REST_KEY}` },
+  });
+  if (!res.ok) throw new Error(`Failed to load ${table}: HTTP ${res.status}`);
+  return (await res.json()) as T[];
+}
+
+const pendingRows = new Map<string, Promise<unknown[]>>();
+const loadedRows = new Map<string, unknown[]>();
+
+function loadRows<T>(cacheKey: string, table: string, query: string): Promise<T[]> {
+  let request = pendingRows.get(cacheKey);
+  if (!request) {
+    request = restSelect<unknown>(table, query).then((rows) => {
+      loadedRows.set(cacheKey, rows);
+      return rows;
+    });
+    // Forget failed requests so the next component mount can retry.
+    request.catch(() => pendingRows.delete(cacheKey));
+    pendingRows.set(cacheKey, request);
+  }
+  return request as Promise<T[]>;
+}
+
+function useRows<T>(cacheKey: string, table: string, query: string): { data: T[]; loading: boolean } {
+  const cached = loadedRows.get(cacheKey) as T[] | undefined;
+  const [data, setData] = useState<T[]>(cached ?? []);
+  const [loading, setLoading] = useState(dataConfigured && !cached);
 
   useEffect(() => {
-    if (!supabaseConfigured) return;
+    if (!dataConfigured) return;
     let cancelled = false;
-    (async () => {
-      const { data: rows } = await supabase.from(table).select("*").order(orderBy);
-      if (!cancelled) setData((rows as T[]) ?? []);
-      if (!cancelled) setLoading(false);
-    })();
+    loadRows<T>(cacheKey, table, query).then(
+      (rows) => {
+        if (cancelled) return;
+        setData(rows);
+        setLoading(false);
+      },
+      (error) => {
+        console.error(error);
+        if (!cancelled) setLoading(false);
+      },
+    );
     return () => { cancelled = true; };
-  }, [table, orderBy]);
+  }, [cacheKey, table, query]);
 
   return { data, loading };
 }
 
+function useFetch<T>(table: string, orderBy = "sort_order"): { data: T[]; loading: boolean } {
+  const query = `select=*&order=${orderBy}.asc`;
+  return useRows<T>(`${table}?${query}`, table, query);
+}
+
+type SettingsMap = Record<string, unknown>;
+const SETTINGS_STORAGE_KEY = "elk:site-settings:v1";
+
+function readStoredSettings(): SettingsMap | null {
+  try {
+    const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as SettingsMap) : null;
+  } catch {
+    return null;
+  }
+}
+
+let settingsSnapshot: SettingsMap | null = typeof window === "undefined" ? null : readStoredSettings();
+
+const settingsRequest: Promise<SettingsMap> | null = dataConfigured
+  ? restSelect<{ key: string; value: unknown }>("site_settings", "select=key,value").then((rows) => {
+      const map: SettingsMap = Object.fromEntries(rows.map((row) => [row.key, row.value]));
+      settingsSnapshot = map;
+      try {
+        window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(map));
+      } catch {
+        // Storage can be unavailable (private mode, quota); the live data is still used.
+      }
+      return map;
+    })
+  : null;
+settingsRequest?.catch((error) => console.error(error));
+
 function useSetting<T>(key: string, fallback: T): { data: T; loading: boolean } {
-  const [data, setData] = useState<T>(fallback);
-  const [loading, setLoading] = useState(supabaseConfigured);
+  const [data, setData] = useState<T>(() => (settingsSnapshot?.[key] as T | undefined) ?? fallback);
+  const [loading, setLoading] = useState(dataConfigured);
 
   useEffect(() => {
-    if (!supabaseConfigured) return;
+    if (!settingsRequest) return;
     let cancelled = false;
-    (async () => {
-      const { data: row } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", key)
-        .maybeSingle();
-      if (!cancelled && row?.value) setData(row.value as T);
-      if (!cancelled) setLoading(false);
-    })();
+    settingsRequest.then(
+      (map) => {
+        if (cancelled) return;
+        if (map[key]) setData(map[key] as T);
+        setLoading(false);
+      },
+      () => {
+        if (!cancelled) setLoading(false);
+      },
+    );
     return () => { cancelled = true; };
   }, [key]);
 
@@ -209,42 +286,28 @@ export function useWorkCategories() {
   return useFetch<WorkCategory>("work_categories");
 }
 
+type WorkCaseRow = Omit<WorkCase, "before_images" | "after_images">;
+
 export function useWorkCases(selectedCategory = "all"): { data: WorkCase[]; loading: boolean } {
-  const [data, setData] = useState<WorkCase[]>([]);
-  const [loading, setLoading] = useState(supabaseConfigured);
+  let query = "select=*,work_categories(id,name,slug)&order=sort_order.asc";
+  if (selectedCategory !== "all") query += `&category_id=eq.${encodeURIComponent(selectedCategory)}`;
+  const { data: rows, loading } = useRows<WorkCaseRow>(`work_cases:${selectedCategory}`, "work_cases", query);
 
-  useEffect(() => {
-    if (!supabaseConfigured) return;
-    let cancelled = false;
-    (async () => {
-      let query = supabase
-        .from("work_cases")
-        .select("*, work_categories(id, name, slug)")
-        .order("sort_order");
-
-      if (selectedCategory !== "all") {
-        query = query.eq("category_id", selectedCategory);
-      }
-
-      const { data: rows } = await query;
-      if (!cancelled && rows) {
-        const normalized = rows.map((row) => {
-          const beforeImages = parseImageField(row.before_image_url);
-          const afterImages = parseImageField(row.after_image_url);
-          return {
-            ...row,
-            before_image_url: beforeImages[0] ?? "",
-            after_image_url: afterImages[0] ?? "",
-            before_images: beforeImages,
-            after_images: afterImages,
-          };
-        });
-        setData(normalized as WorkCase[]);
-      }
-      if (!cancelled) setLoading(false);
-    })();
-    return () => { cancelled = true; };
-  }, [selectedCategory]);
+  const data = useMemo(
+    () =>
+      rows.map((row) => {
+        const beforeImages = parseImageField(row.before_image_url);
+        const afterImages = parseImageField(row.after_image_url);
+        return {
+          ...row,
+          before_image_url: beforeImages[0] ?? "",
+          after_image_url: afterImages[0] ?? "",
+          before_images: beforeImages,
+          after_images: afterImages,
+        };
+      }),
+    [rows],
+  );
 
   return { data, loading };
 }

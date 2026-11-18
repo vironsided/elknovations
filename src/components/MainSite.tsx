@@ -17,6 +17,8 @@ const WorkNearYouDrawer = lazy(() =>
 
 export function MainSite() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Mount the drawer (and fetch its code, map and data) only after the first open.
+  const [drawerMounted, setDrawerMounted] = useState(false);
 
   return (
     <>
@@ -32,10 +34,17 @@ export function MainSite() {
         <FAQ />
         <Contact />
       </main>
-      <WorkNearYouTab onOpen={() => setDrawerOpen(true)} />
-      <Suspense fallback={null}>
-        <WorkNearYouDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-      </Suspense>
+      <WorkNearYouTab
+        onOpen={() => {
+          setDrawerMounted(true);
+          setDrawerOpen(true);
+        }}
+      />
+      {drawerMounted && (
+        <Suspense fallback={null}>
+          <WorkNearYouDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+        </Suspense>
+      )}
     </>
   );
 }

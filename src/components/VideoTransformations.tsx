@@ -8,6 +8,25 @@ export function VideoTransformations() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [muted, setMuted] = useState(true);
   const mainRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  // Videos are heavy: don't download anything until the section is near the viewport.
+  const [nearViewport, setNearViewport] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || nearViewport) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [videos.length, nearViewport]);
 
   const playMain = useCallback(() => {
     const v = mainRef.current;
@@ -18,8 +37,8 @@ export function VideoTransformations() {
   }, []);
 
   useEffect(() => {
-    playMain();
-  }, [activeIdx, playMain]);
+    if (nearViewport) playMain();
+  }, [activeIdx, nearViewport, playMain]);
 
   const handleThumbClick = (i: number) => {
     if (i !== activeIdx) setActiveIdx(i);
@@ -33,6 +52,7 @@ export function VideoTransformations() {
 
   return (
     <section
+      ref={sectionRef}
       id="transformations"
       className="relative overflow-hidden bg-[#070707] px-5 py-20 md:px-10 lg:px-14 lg:py-28"
     >
@@ -92,7 +112,7 @@ export function VideoTransformations() {
               >
                 <video
                   ref={mainRef}
-                  src={videos[activeIdx]?.src ?? ""}
+                  src={nearViewport ? videos[activeIdx]?.src : undefined}
                   className="h-full w-full object-cover"
                   muted={muted}
                   autoPlay
@@ -169,7 +189,7 @@ export function VideoTransformations() {
                   {/* Thumbnail video (shows poster frame) */}
                   <div className="aspect-video overflow-hidden bg-neutral-900">
                     <video
-                      src={video.src}
+                      src={nearViewport ? video.src : undefined}
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                       muted
                       playsInline

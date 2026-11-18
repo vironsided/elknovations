@@ -1,5 +1,33 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "images": {
+    "sizes": [
+      128,
+      256,
+      384,
+      640,
+      828,
+      1080,
+      1600,
+      2048
+    ],
+    "domains": [],
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "maljhpgkprkcxfkglrzs.supabase.co",
+        "pathname": "^/storage/v1/object/public/.*$"
+      }
+    ],
+    "formats": [
+      "image/avif",
+      "image/webp"
+    ],
+    "minimumCacheTTL": 2678400
+  }
 }

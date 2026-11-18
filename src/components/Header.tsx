@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBrand } from "../hooks/useSiteData";
+import { Link } from "react-router-dom";
 import { ElkLogo } from "./ElkLogo";
 
 const nav = [
@@ -83,6 +84,13 @@ export function Header() {
                   {item.label}
                 </a>
               ))}
+              <Link
+                to="/work"
+                className="rounded-lg px-3 py-3 text-base font-medium text-amber-300 hover:bg-white/5"
+                onClick={() => setMenuOpen(false)}
+              >
+                View projects
+              </Link>
             </nav>
           </motion.div>
         )}
