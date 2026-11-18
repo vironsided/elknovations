@@ -176,16 +176,7 @@ export function WorkCasesManager() {
               <input
                 value={editing.location}
                 onChange={(e) => setEditing({ ...editing, location: e.target.value })}
-                placeholder="Ohio"
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-600">Completed date</label>
-              <input
-                type="date"
-                value={editing.completed_at ?? ""}
-                onChange={(e) => setEditing({ ...editing, completed_at: e.target.value || null })}
+                placeholder="Fairfax, VA"
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
               />
             </div>

@@ -3,13 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useWorkCases, useWorkCategories } from "../hooks/useSiteData";
 
-function formatDate(value: string | null) {
-  if (!value) return "Date not specified";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
-}
-
 function CaseImageGrid({
   title,
   label,
@@ -177,9 +170,6 @@ export function WorkPage() {
                       </span>
                       <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
                         {item.location || "Location not specified"}
-                      </span>
-                      <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
-                        {formatDate(item.completed_at)}
                       </span>
                     </div>
 

@@ -142,14 +142,6 @@ export function WorkMap({ cases, onMarkerClickId }: Props) {
                     {c.location && (
                       <p className="text-xs text-neutral-500">{c.location}</p>
                     )}
-                    {c.completed_at && (
-                      <p className="text-xs text-neutral-500">
-                        {new Date(c.completed_at).toLocaleDateString(undefined, {
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
-                    )}
                   </div>
                   <Link
                     to="/work"

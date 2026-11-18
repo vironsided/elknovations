@@ -1,4 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#0a0a0a"/>
-  <path fill="#f97316" d="M8 22V10h4l4 7 4-7h4v12h-3.5v-7.2L17 22h-2l-3.5-7.2V22H8z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Elk Novations">
+  <defs>
+    <mask id="tools" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="220">
+      <rect width="200" height="220" fill="#fff"/>
+      <g fill="#000">
+        <g transform="rotate(-45 100 150)"><circle cx="100" cy="112" r="20"/><rect x="94" y="118" width="12" height="78" rx="6"/></g>
+        <g transform="rotate(45 100 150)"><rect x="94" y="112" width="12" height="86" rx="4"/><rect x="72" y="100" width="56" height="22" rx="3"/></g>
+      </g>
+      <g transform="rotate(-45 100 150)" fill="#fff"><rect x="93" y="86" width="14" height="24"/></g>
+    </mask>
+  </defs>
+  <rect width="240" height="240" rx="48" fill="#E9A03B"/>
+  <g transform="translate(26 14) scale(0.94)">
+    <g mask="url(#tools)" fill="#1F3D2E">
+      <path d="M146 46 V24 H170 V66 Z"/>
+      <path d="M100 6 L192 84 L192 214 L8 214 L8 84 Z" stroke="#1F3D2E" stroke-width="10" stroke-linejoin="round"/>
+    </g>
+  </g>
 </svg>

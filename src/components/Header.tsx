@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBrand } from "../hooks/useSiteData";
+import { ElkLogo } from "./ElkLogo";
 
 const nav = [
   { label: "About", href: "#about" },
@@ -30,11 +31,8 @@ export function Header() {
       className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black"
     >
       <div className="mx-auto flex h-[4.5rem] max-w-[1600px] items-center justify-between gap-4 px-5 md:px-10 lg:px-14">
-        <a
-          href="#hero"
-          className="text-[1.05rem] font-semibold tracking-tight text-white"
-        >
-          {brand.name}
+        <a href="#hero" className="flex h-9 shrink-0 items-center md:h-10" aria-label={brand.name}>
+          <ElkLogo className="h-full" />
         </a>
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">

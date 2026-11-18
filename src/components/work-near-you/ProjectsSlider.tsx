@@ -1,24 +1,9 @@
-import { useMemo, useRef, useState } from "react";
-import { CalendarDays, MapPin } from "lucide-react";
+import { useRef, useState } from "react";
+import { MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { WorkCase } from "../../hooks/useSiteData";
 
 type Props = { cases: WorkCase[]; projectCount: number };
-
-function formatDate(value: string | null): string {
-  if (!value) return "";
-  try {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return value;
-  }
-}
 
 function ProjectImageStrip({
   before,
@@ -123,13 +108,8 @@ function ProjectImageStrip({
 }
 
 export function ProjectsSlider({ cases, projectCount }: Props) {
-  const sorted = useMemo(() => {
-    return [...cases].sort((a, b) => {
-      const da = a.completed_at ? new Date(a.completed_at).getTime() : 0;
-      const db = b.completed_at ? new Date(b.completed_at).getTime() : 0;
-      return db - da;
-    });
-  }, [cases]);
+  // Cases arrive already ordered by sort_order (set in the admin panel).
+  const sorted = cases;
 
   return (
     <div>
@@ -178,12 +158,6 @@ export function ProjectsSlider({ cases, projectCount }: Props) {
                     <span className="inline-flex items-center gap-0.5">
                       <MapPin className="h-3 w-3 shrink-0" />
                       {c.location}
-                    </span>
-                  )}
-                  {c.completed_at && (
-                    <span className="inline-flex items-center gap-0.5">
-                      <CalendarDays className="h-3 w-3 shrink-0" />
-                      {formatDate(c.completed_at)}
                     </span>
                   )}
                 </div>

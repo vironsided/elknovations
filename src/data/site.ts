@@ -393,7 +393,7 @@ export const testimonials = Array.from({ length: 100 }, (_, i) => {
 export const faqs = [
   {
     q: "What areas do you serve?",
-    a: "We work with homeowners across the United States depending on project scope. Reach out with your location and we’ll confirm availability.",
+    a: "We work with homeowners across Virginia, Washington, DC, and Maryland. Reach out with your location and we’ll confirm availability.",
   },
   {
     q: "How long does a typical project take?",
@@ -426,7 +426,7 @@ export const contact = {
   title: "Get in touch",
   intro:
     "For inquiries or to explore your project, contact our team using the details below.",
-  office: "Serving homeowners nationwide — schedule a call for your region.",
+  office: "Serving homeowners in Virginia, Washington, DC, and Maryland.",
   email: "elknovations@gmail.com",
   phone: "(301) 825 4740",
 };
