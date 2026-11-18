@@ -1,15 +1,9 @@
 import { Suspense, lazy, useState } from "react";
 import { Header } from "./Header";
 import { Hero } from "./Hero";
-import { About } from "./About";
-import { Stats } from "./Stats";
-import { Services } from "./Services";
-import { WorkShowcase } from "./WorkShowcase";
-import { VideoTransformations } from "./VideoTransformations";
-import { Testimonials } from "./Testimonials";
-import { FAQ } from "./FAQ";
-import { Contact } from "./Contact";
 import { WorkNearYouTab } from "./work-near-you/WorkNearYouTab";
+
+const BelowTheFold = lazy(() => import("./BelowTheFold"));
 
 const WorkNearYouDrawer = lazy(() =>
   import("./work-near-you/WorkNearYouDrawer").then((m) => ({ default: m.WorkNearYouDrawer })),
@@ -25,14 +19,9 @@ export function MainSite() {
       <Header />
       <main>
         <Hero />
-        <About />
-        <Stats />
-        <Services />
-        <WorkShowcase />
-        <VideoTransformations />
-        <Testimonials />
-        <FAQ />
-        <Contact />
+        <Suspense fallback={null}>
+          <BelowTheFold />
+        </Suspense>
       </main>
       <WorkNearYouTab
         onOpen={() => {

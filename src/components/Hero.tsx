@@ -90,7 +90,7 @@ export function Hero() {
                 <SmartImage
                   src={hero.image}
                   widths={[640, 828, 1080, 1600, 2048]}
-                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  sizes="(min-width: 1024px) 50vw, 85vw"
                   loading="eager"
                   fetchPriority="high"
                   alt=""
