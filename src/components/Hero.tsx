@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
-import { useBrand, useHero } from "../hooks/useSiteData";
+import { useBrand, useHero, useStats } from "../hooks/useSiteData";
 import { SmartImage } from "./ui/SmartImage";
 
 // Entrance animations are plain CSS (see .hero-fade-up in index.css) so they start with
@@ -9,6 +9,15 @@ const delay = (i: number) => ({ animationDelay: `${0.12 * i}s` });
 export function Hero() {
   const { data: brand } = useBrand();
   const { data: hero } = useHero();
+  // Trust badges use the same numbers as the Stats section (Admin → Site Settings → stats),
+  // so the two places can't disagree. Fallbacks are used until settings load.
+  const { data: stats } = useStats();
+  const stat = (label: RegExp, fallback: string) => stats.find((s) => label.test(s.label))?.value || fallback;
+  const badges = [
+    [stat(/project/i, "250+"), "Projects"],
+    [`${stat(/year/i, "12")}yrs`, "Experience"],
+    [stat(/satisf/i, "100%"), "Satisfaction"],
+  ];
   if (!brand.tagline && !hero.image) return null;
 
   return (
@@ -73,7 +82,7 @@ export function Hero() {
               style={delay(4)}
               className="hero-fade-up mt-10 flex items-center gap-6 border-t border-white/5 pt-8"
             >
-              {[["250+", "Projects"], ["8yrs", "Experience"], ["100%", "Satisfaction"]].map(([val, lbl]) => (
+              {badges.map(([val, lbl]) => (
                 <div key={lbl} className="text-center">
                   <p className="text-lg font-semibold text-white">{val}</p>
                   <p className="text-xs text-neutral-500">{lbl}</p>
