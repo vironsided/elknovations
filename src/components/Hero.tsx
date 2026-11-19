@@ -87,10 +87,11 @@ export function Hero() {
               className="hero-zoom-in relative h-full min-h-[48vh] p-4 pt-2 sm:p-5 lg:absolute lg:inset-0 lg:min-h-full lg:p-6 lg:pl-2"
             >
               <div className="relative h-full min-h-[44vh] overflow-hidden rounded-2xl lg:min-h-0 lg:rounded-3xl">
+                {/* widths and sizes must match the hero preload script in index.html */}
                 <SmartImage
                   src={hero.image}
                   widths={[640, 828, 1080, 1600, 2048]}
-                  sizes="(min-width: 1024px) 50vw, 85vw"
+                  sizes="(min-width: 1024px) 50vw, 70vw"
                   loading="eager"
                   fetchPriority="high"
                   alt=""

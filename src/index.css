@@ -179,6 +179,11 @@ body {
 }
 .hero-fade-up { animation: hero-fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .hero-zoom-in { animation: hero-zoom-in 1s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes header-slide-in {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: none; }
+}
+.header-slide-in { animation: header-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @media (prefers-reduced-motion: reduce) {
-  .hero-fade-up, .hero-zoom-in { animation: none; }
+  .hero-fade-up, .hero-zoom-in, .header-slide-in { animation: none; }
 }

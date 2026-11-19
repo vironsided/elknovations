@@ -210,9 +210,23 @@ function readStoredSettings(): SettingsMap | null {
 
 let settingsSnapshot: SettingsMap | null = typeof window === "undefined" ? null : readStoredSettings();
 
+declare global {
+  interface Window {
+    /** Settings request started by the inline script in index.html, before this bundle loads. */
+    __elkSettings?: Promise<SettingsMap>;
+  }
+}
+
+function fetchSettings(): Promise<SettingsMap> {
+  const early = typeof window === "undefined" ? undefined : window.__elkSettings;
+  if (early) return early;
+  return restSelect<{ key: string; value: unknown }>("site_settings", "select=key,value").then((rows) =>
+    Object.fromEntries(rows.map((row) => [row.key, row.value])),
+  );
+}
+
 const settingsRequest: Promise<SettingsMap> | null = dataConfigured
-  ? restSelect<{ key: string; value: unknown }>("site_settings", "select=key,value").then((rows) => {
-      const map: SettingsMap = Object.fromEntries(rows.map((row) => [row.key, row.value]));
+  ? fetchSettings().then((map) => {
       settingsSnapshot = map;
       try {
         window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(map));

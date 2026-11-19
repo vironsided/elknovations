@@ -78,6 +78,7 @@ export function About() {
                   widths={[256, 384, 640, 828]}
                   sizes="(min-width: 1024px) 240px, (min-width: 768px) 208px, 176px"
                   alt=""
+                  fetchPriority="low"
                   className="h-full w-full object-cover select-none"
                   draggable={false}
                 />

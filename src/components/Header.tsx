@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useBrand } from "../hooks/useSiteData";
 import { Link } from "react-router-dom";
 import { ElkLogo } from "./ElkLogo";
@@ -25,12 +24,9 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <motion.header
-      initial={{ y: -16, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black"
-    >
+    // Animations here are CSS only: the header is on the critical path, and keeping
+    // framer-motion out of it lets that library load with the rest of the page later.
+    <header className="header-slide-in fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black">
       <div className="mx-auto flex h-[4.5rem] max-w-[1600px] items-center justify-between gap-4 px-5 md:px-10 lg:px-14">
         <a href="#hero" className="flex h-9 shrink-0 items-center md:h-10" aria-label={brand.name}>
           <ElkLogo className="h-full" />
@@ -61,14 +57,14 @@ export function Header() {
         </button>
       </div>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden border-t border-white/10 bg-neutral-950 md:hidden"
-          >
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out md:hidden ${
+          menuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+        inert={!menuOpen}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-white/10 bg-neutral-950">
             <nav className="flex flex-col gap-1 px-5 py-4" aria-label="Mobile">
               {nav.map((item) => (
                 <a
@@ -92,9 +88,9 @@ export function Header() {
                 View projects
               </Link>
             </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }

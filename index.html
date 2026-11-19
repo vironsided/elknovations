@@ -11,6 +11,63 @@
     <title>Elk Novations | Home Improvement</title>
     <!-- Site content is read from Supabase as soon as the JS loads; open the connection early. -->
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <script>
+      // Start loading the site settings and the hero photo before the app's JavaScript arrives.
+      // The app picks the request up from window.__elkSettings (src/hooks/useSiteData.ts).
+      // Hero widths/sizes must match the hero <SmartImage> in src/components/Hero.tsx,
+      // otherwise the browser downloads the photo twice.
+      (function () {
+        var base = "%VITE_SUPABASE_URL%".replace(/\/$/, "");
+        var key = "%VITE_SUPABASE_ANON_KEY%";
+        if (!base || !key || !window.fetch || !window.URL) return;
+        var widths = [640, 828, 1080, 1600, 2048];
+        var sizes = "(min-width: 1024px) 50vw, 70vw";
+        var done = {};
+        function resized(src, w) {
+          var u = new URL(src);
+          if (u.hostname === "images.unsplash.com") {
+            u.searchParams.set("w", String(w));
+            u.searchParams.set("q", "75");
+            u.searchParams.set("auto", "format");
+            return u.toString();
+          }
+          var local = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+          if (!local && u.origin === base && u.pathname.indexOf("/storage/v1/object/public/") === 0) {
+            return "/_vercel/image?url=" + encodeURIComponent(src) + "&w=" + w + "&q=75";
+          }
+          return null;
+        }
+        function preloadHero(settings) {
+          try {
+            var src = settings && settings.hero && settings.hero.image;
+            if (!src || done[src] || !resized(src, widths[0])) return;
+            done[src] = true;
+            var link = document.createElement("link");
+            link.rel = "preload";
+            link.as = "image";
+            link.setAttribute("imagesrcset", widths.map(function (w) { return resized(src, w) + " " + w + "w"; }).join(", "));
+            link.setAttribute("imagesizes", sizes);
+            link.setAttribute("fetchpriority", "high");
+            document.head.appendChild(link);
+          } catch (e) {}
+        }
+        try { preloadHero(JSON.parse(localStorage.getItem("elk:site-settings:v1") || "null")); } catch (e) {}
+        window.__elkSettings = fetch(base + "/rest/v1/site_settings?select=key,value", {
+          headers: { apikey: key, Authorization: "Bearer " + key },
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error("site_settings: HTTP " + res.status);
+            return res.json();
+          })
+          .then(function (rows) {
+            var map = {};
+            rows.forEach(function (row) { map[row.key] = row.value; });
+            preloadHero(map);
+            return map;
+          });
+        window.__elkSettings.catch(function () {});
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
