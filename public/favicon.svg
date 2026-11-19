@@ -1,1 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#FFFFFF"/><path d="M15 9h6v12h-6z" fill="#34482A"/><path d="M5 31 L32 8 L59 31 L54 35 L32 16 L10 35Z" fill="#34482A"/><path d="M12 33 L32 16 L52 33 V56 H12Z" fill="#34482A"/><path d="M17 31 L32 19 L47 31" fill="none" stroke="#EA961A" stroke-width="3.5"/><rect x="16" y="36" width="10" height="9" fill="#EA961A"/><rect x="34" y="35" width="11" height="21" fill="#EA961A"/><rect x="36.5" y="37.5" width="6" height="5" fill="#FFFFFF"/><path d="M4 58 C20 52 44 52 60 57" fill="none" stroke="#EA961A" stroke-width="0"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3 3 58 58">
+  <!-- Transparent background; colours follow the browser theme so the icon reads on light and dark tab bars. -->
+  <style>
+    .g{fill:#34482A}.a{fill:#EA961A}.r{stroke:#EA961A}.w{fill:#FFFFFF}
+    @media (prefers-color-scheme: dark){.g{fill:#6FA04A}.a{fill:#F2A532}.r{stroke:#F2A532}.w{fill:#F4EFE4}}
+  </style>
+  <path class="g" d="M15 9h6v12h-6z"/>
+  <path class="g" d="M5 31 L32 8 L59 31 L54 35 L32 16 L10 35Z"/>
+  <path class="g" d="M12 33 L32 16 L52 33 V58 H12Z"/>
+  <path class="r" d="M17 31 L32 19 L47 31" fill="none" stroke-width="3.5"/>
+  <rect class="a" x="16" y="37" width="10" height="9"/>
+  <rect class="a" x="34" y="36" width="11" height="22"/>
+  <rect class="w" x="36.5" y="38.5" width="6" height="5"/>
+</svg>
