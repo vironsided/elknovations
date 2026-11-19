@@ -1,8 +1,43 @@
-import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useWorkCases, useWorkCategories } from "../hooks/useSiteData";
 import { SmartImage } from "./ui/SmartImage";
+
+/**
+ * Card that fades in when it scrolls into view (CSS transition + IntersectionObserver,
+ * so this page doesn't need framer-motion). `immediate` shows it without animation.
+ */
+function RevealCard({ children, className, immediate = false }: { children: ReactNode; className: string; immediate?: boolean }) {
+  const ref = useRef<HTMLElement>(null);
+  const [shown, setShown] = useState(immediate);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (shown || !el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShown(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -40px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [shown]);
+
+  return (
+    <article
+      ref={ref}
+      className={`${className} transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none ${
+        shown ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+      }`}
+    >
+      {children}
+    </article>
+  );
+}
 
 function CaseImageGrid({
   title,
@@ -119,7 +154,7 @@ function CaseImagesSection({
 export function WorkPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { data: categories } = useWorkCategories();
-  const { data: cases } = useWorkCases(selectedCategory);
+  const { data: cases, loading } = useWorkCases(selectedCategory);
 
   const categoryOptions = useMemo(
     () => [{ id: "all", name: "All" }, ...categories.map((c) => ({ id: c.id, name: c.name }))],
@@ -166,19 +201,19 @@ export function WorkPage() {
         </div>
 
         {cases.length === 0 ? (
+          // While loading, show nothing rather than a misleading "no projects" message.
+          loading ? null : (
           <div className="mt-10 rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center text-neutral-500">
             No projects in this category yet.
           </div>
+          )
         ) : (
           <div className="mt-10 space-y-8">
             {cases.map((item, index) => (
-              <motion.article
+              <RevealCard
                 key={item.id}
-                // The first card is visible on load: show it immediately (no fade-in delay).
-                initial={index === 0 ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.04, duration: 0.4 }}
+                // The first card is visible on load: show it right away (it is the main content).
+                immediate={index === 0}
                 className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm"
               >
                 <div className="grid gap-0 lg:grid-cols-2">
@@ -210,7 +245,7 @@ export function WorkPage() {
                     </div>
                   </div>
                 </div>
-              </motion.article>
+              </RevealCard>
             ))}
           </div>
         )}

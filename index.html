@@ -12,17 +12,31 @@
     <!-- Site content is read from Supabase as soon as the JS loads; open the connection early. -->
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <script>
-      // Start loading the site settings and the hero photo before the app's JavaScript arrives.
-      // The app picks the request up from window.__elkSettings (src/hooks/useSiteData.ts).
-      // Hero widths/sizes must match the hero <SmartImage> in src/components/Hero.tsx,
-      // otherwise the browser downloads the photo twice.
+      // Start each page's critical requests before the app's JavaScript arrives:
+      //   "/"      site settings + hero photo               (src/components/Hero.tsx)
+      //   "/work"  projects + categories + first project's photos (src/components/WorkPage.tsx)
+      // The app reuses these requests (window.__elkSettings / window.__elkEarlyRows, see
+      // src/hooks/useSiteData.ts). The image widths/sizes below must match the <SmartImage>
+      // props in those components, otherwise the browser downloads the photo twice.
       (function () {
         var base = "%VITE_SUPABASE_URL%".replace(/\/$/, "");
         var key = "%VITE_SUPABASE_ANON_KEY%";
         if (!base || !key || !window.fetch || !window.URL) return;
-        var widths = [640, 828, 1080, 1600, 2048];
-        var sizes = "(min-width: 1024px) 50vw, 70vw";
-        var done = {};
+        var path = location.pathname.replace(/\/+$/, "") || "/";
+        var local = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+        var HERO = { widths: [640, 828, 1080, 1600, 2048], sizes: "(min-width: 1024px) 50vw, 70vw" };
+        var CASE = { widths: [640, 828, 1080, 1600], sizes: "(min-width: 1024px) 33vw, 70vw" };
+        var preloaded = {};
+
+        function get(query) {
+          return fetch(base + "/rest/v1/" + query, {
+            headers: { apikey: key, Authorization: "Bearer " + key },
+          }).then(function (res) {
+            if (!res.ok) throw new Error(query + ": HTTP " + res.status);
+            return res.json();
+          });
+        }
+        // Same rules as resizedImageUrl() in src/lib/images.ts.
         function resized(src, w) {
           var u = new URL(src);
           if (u.hostname === "images.unsplash.com") {
@@ -31,52 +45,65 @@
             u.searchParams.set("auto", "format");
             return u.toString();
           }
-          var local = location.hostname === "localhost" || location.hostname === "127.0.0.1";
           if (!local && u.origin === base && u.pathname.indexOf("/storage/v1/object/public/") === 0) {
             return "/_vercel/image?url=" + encodeURIComponent(src) + "&w=" + w + "&q=75";
           }
           return null;
         }
-        function preloadHero(settings) {
+        function preload(src, img) {
           try {
-            var src = settings && settings.hero && settings.hero.image;
-            if (!src || done[src] || !resized(src, widths[0])) return;
-            done[src] = true;
+            if (!src || preloaded[src] || !resized(src, img.widths[0])) return;
+            preloaded[src] = true;
             var link = document.createElement("link");
             link.rel = "preload";
             link.as = "image";
-            link.setAttribute("imagesrcset", widths.map(function (w) { return resized(src, w) + " " + w + "w"; }).join(", "));
-            link.setAttribute("imagesizes", sizes);
+            link.setAttribute("imagesrcset", img.widths.map(function (w) { return resized(src, w) + " " + w + "w"; }).join(", "));
+            link.setAttribute("imagesizes", img.sizes);
             link.setAttribute("fetchpriority", "high");
             document.head.appendChild(link);
           } catch (e) {}
         }
+        // First URL of an image field (plain URL or JSON array), like parseImageField().
+        function firstImage(value) {
+          var v = String(value || "").trim();
+          if (v.charAt(0) === "[") {
+            try {
+              var list = JSON.parse(v);
+              for (var i = 0; i < list.length; i++) {
+                if (typeof list[i] === "string" && list[i].trim()) return list[i].trim();
+              }
+              return "";
+            } catch (e) {}
+          }
+          return v;
+        }
+        function preloadHero(settings) {
+          if (path === "/" && settings && settings.hero) preload(settings.hero.image, HERO);
+        }
+
         try { preloadHero(JSON.parse(localStorage.getItem("elk:site-settings:v1") || "null")); } catch (e) {}
-        window.__elkSettings = fetch(base + "/rest/v1/site_settings?select=key,value", {
-          headers: { apikey: key, Authorization: "Bearer " + key },
-        })
-          .then(function (res) {
-            if (!res.ok) throw new Error("site_settings: HTTP " + res.status);
-            return res.json();
-          })
-          .then(function (rows) {
-            var map = {};
-            rows.forEach(function (row) { map[row.key] = row.value; });
-            preloadHero(map);
-            return map;
-          });
+        window.__elkSettings = get("site_settings?select=key,value").then(function (rows) {
+          var map = {};
+          rows.forEach(function (row) { map[row.key] = row.value; });
+          preloadHero(map);
+          return map;
+        });
         window.__elkSettings.catch(function () {});
-        // On /work the project list is the main content: start it now too
-        // (same query and cache key as useWorkCases("all")).
-        if (location.pathname.replace(/\/+$/, "") === "/work") {
-          var cases = fetch(base + "/rest/v1/work_cases?select=*,work_categories(id,name,slug)&order=sort_order.asc", {
-            headers: { apikey: key, Authorization: "Bearer " + key },
-          }).then(function (res) {
-            if (!res.ok) throw new Error("work_cases: HTTP " + res.status);
-            return res.json();
-          });
-          cases.catch(function () {});
-          window.__elkEarlyRows = { "work_cases:all": cases };
+
+        if (path === "/work") {
+          // Same queries (and cache keys) as useWorkCases("all") and useWorkCategories().
+          var cases = get("work_cases?select=*,work_categories(id,name,slug)&order=sort_order.asc");
+          var categories = get("work_categories?select=*&order=sort_order.asc");
+          cases.then(function (rows) {
+            if (!rows || !rows[0]) return;
+            preload(firstImage(rows[0].before_image_url), CASE);
+            preload(firstImage(rows[0].after_image_url), CASE);
+          }).catch(function () {});
+          categories.catch(function () {});
+          window.__elkEarlyRows = {
+            "work_cases:all": cases,
+            "work_categories?select=*&order=sort_order.asc": categories,
+          };
         }
       })();
     </script>
