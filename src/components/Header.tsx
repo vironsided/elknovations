@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useBrand } from "../hooks/useSiteData";
 import { Link } from "react-router-dom";
-import { ElkLogo } from "./ElkLogo";
 
 const nav = [
   { label: "About", href: "#about" },
@@ -28,8 +27,15 @@ export function Header() {
     // framer-motion out of it lets that library load with the rest of the page later.
     <header className="header-slide-in fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black">
       <div className="mx-auto flex h-[4.5rem] max-w-[1600px] items-center justify-between gap-4 px-5 md:px-10 lg:px-14">
-        <a href="#hero" className="flex h-9 shrink-0 items-center md:h-10" aria-label={brand.name}>
-          <ElkLogo className="h-full" />
+        <a href="#hero" className="flex shrink-0 items-center" aria-label={brand.name || "Elk Novations"}>
+          <img
+            src="/brand/elk-logo-header-dark.svg"
+            alt="Elk Novations"
+            width={1177}
+            height={400}
+            className="h-11 w-auto md:h-12"
+            fetchPriority="high"
+          />
         </a>
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
