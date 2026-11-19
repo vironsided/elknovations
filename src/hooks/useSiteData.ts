@@ -155,7 +155,9 @@ const loadedRows = new Map<string, unknown[]>();
 function loadRows<T>(cacheKey: string, table: string, query: string): Promise<T[]> {
   let request = pendingRows.get(cacheKey);
   if (!request) {
-    request = restSelect<unknown>(table, query).then((rows) => {
+    // index.html may already have started this request (e.g. work cases on /work).
+    const early = typeof window === "undefined" ? undefined : window.__elkEarlyRows?.[cacheKey];
+    request = (early ?? restSelect<unknown>(table, query)).then((rows) => {
       loadedRows.set(cacheKey, rows);
       return rows;
     });
@@ -214,6 +216,8 @@ declare global {
   interface Window {
     /** Settings request started by the inline script in index.html, before this bundle loads. */
     __elkSettings?: Promise<SettingsMap>;
+    /** Table requests started early by index.html, keyed like useRows cache keys. */
+    __elkEarlyRows?: Record<string, Promise<unknown[]>>;
   }
 }
 

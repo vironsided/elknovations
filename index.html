@@ -66,6 +66,18 @@
             return map;
           });
         window.__elkSettings.catch(function () {});
+        // On /work the project list is the main content: start it now too
+        // (same query and cache key as useWorkCases("all")).
+        if (location.pathname.replace(/\/+$/, "") === "/work") {
+          var cases = fetch(base + "/rest/v1/work_cases?select=*,work_categories(id,name,slug)&order=sort_order.asc", {
+            headers: { apikey: key, Authorization: "Bearer " + key },
+          }).then(function (res) {
+            if (!res.ok) throw new Error("work_cases: HTTP " + res.status);
+            return res.json();
+          });
+          cases.catch(function () {});
+          window.__elkEarlyRows = { "work_cases:all": cases };
+        }
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

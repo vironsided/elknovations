@@ -9,11 +9,14 @@ function CaseImageGrid({
   label,
   images,
   showLabel = true,
+  priority = false,
 }: {
   title: string;
   label?: "Before" | "After";
   images: string[];
   showLabel?: boolean;
+  /** First project on the page: load its main photo right away. */
+  priority?: boolean;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const captionLabel = (label ?? "Project").toLowerCase();
@@ -41,7 +44,9 @@ function CaseImageGrid({
         <SmartImage
           src={activeImage}
           widths={[640, 828, 1080, 1600]}
-          sizes="(min-width: 1024px) 33vw, 100vw"
+          sizes="(min-width: 1024px) 33vw, 70vw"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           alt={`${title} ${captionLabel} ${safeIndex + 1}`}
           className="h-56 w-full object-cover sm:h-72 lg:h-80"
         />
@@ -78,7 +83,17 @@ function CaseImageGrid({
   );
 }
 
-function CaseImagesSection({ title, beforeImages, afterImages }: { title: string; beforeImages: string[]; afterImages: string[] }) {
+function CaseImagesSection({
+  title,
+  beforeImages,
+  afterImages,
+  priority = false,
+}: {
+  title: string;
+  beforeImages: string[];
+  afterImages: string[];
+  priority?: boolean;
+}) {
   const hasBefore = beforeImages.length > 0;
   const hasAfter = afterImages.length > 0;
 
@@ -88,15 +103,15 @@ function CaseImagesSection({ title, beforeImages, afterImages }: { title: string
   if (!hasBefore || !hasAfter) {
     return (
       <div className="border-b border-neutral-200 lg:border-b-0 lg:border-r">
-        <CaseImageGrid title={title} images={hasAfter ? afterImages : beforeImages} showLabel={false} />
+        <CaseImageGrid title={title} images={hasAfter ? afterImages : beforeImages} showLabel={false} priority={priority} />
       </div>
     );
   }
 
   return (
     <div className="grid border-b border-neutral-200 lg:border-b-0 lg:border-r lg:grid-cols-2">
-      <CaseImageGrid title={title} label="Before" images={beforeImages} />
-      <CaseImageGrid title={title} label="After" images={afterImages} />
+      <CaseImageGrid title={title} label="Before" images={beforeImages} priority={priority} />
+      <CaseImageGrid title={title} label="After" images={afterImages} priority={priority} />
     </div>
   );
 }
@@ -159,14 +174,20 @@ export function WorkPage() {
             {cases.map((item, index) => (
               <motion.article
                 key={item.id}
-                initial={{ opacity: 0, y: 20 }}
+                // The first card is visible on load: show it immediately (no fade-in delay).
+                initial={index === 0 ? false : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.04, duration: 0.4 }}
                 className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm"
               >
                 <div className="grid gap-0 lg:grid-cols-2">
-                  <CaseImagesSection title={item.title} beforeImages={item.before_images} afterImages={item.after_images} />
+                  <CaseImagesSection
+                    title={item.title}
+                    beforeImages={item.before_images}
+                    afterImages={item.after_images}
+                    priority={index === 0}
+                  />
 
                   <div className="p-6 md:p-8">
                     <div className="flex flex-wrap items-center gap-2">
